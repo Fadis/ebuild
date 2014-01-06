@@ -1,0 +1,11 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2653d45..62d5974 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -35,5 +35,5 @@ pkg_check_modules(OpenCV opencv)
+ 
+ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR} ${Boost_INCLUDE_DIRS} )
+ link_directories( ${Boost_LIBRARY_DIRS} )
+-subdirs( sprout libs tools cmake )
++subdirs( sprout tools cmake )
+ 
