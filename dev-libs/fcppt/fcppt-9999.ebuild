@@ -14,12 +14,14 @@ EGIT_COMMIT="master"
 
 LICENSE="Boost-1.0"
 
-KEYWORDS="amd64 x86"
+KEYWORDS=""
 
 RDEPEND="dev-libs/boost >=dev-util/cmake-2.8.12"
 DEPEND="${RDEPEND}"
 SLOT="0"
 IUSE=""
+
+CXXFLAGS="${CXXFLAGS} -std=c++11"
 
 src_configure() {
 	cmake-utils_src_configure
