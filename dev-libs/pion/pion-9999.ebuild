@@ -10,7 +10,7 @@ inherit git-2 autotools-utils
 DESCRIPTION="C++ framework for building lightweight HTTP interfaces"
 HOMEPAGE="https://github.com/cloudmeter/pion"
 EGIT_REPO_URI="git://github.com/cloudmeter/pion https://github.com/cloudmeter/pion"
-EGIT_COMMIT="master"
+EGIT_COMMIT="develop"
 
 LICENSE="Boost-1.0"
 
@@ -21,7 +21,12 @@ DEPEND="${RDEPEND}"
 SLOT="0"
 IUSE=""
 
+CXXFLAGS="${CXXFLAGS} -I${S}/common/include -I${S}/include"
+
 src_configure() {
+	pushd ${S}
+	${S}/autogen.sh
+	popd
 	local myeconfargs=(
 	  --with-log4cplus
 	)
