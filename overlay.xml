@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <layman>
-  <overlay name="fadis" status="unofficial" contact="fadis@quaternion.sakura.ne.jp" type="git" src="git://github.com/Fadis/ebuilds.git">
+  <overlay name="fadis" status="unofficial" contact="fadis@quaternion.sakura.ne.jp" type="git" src="https://github.com/Fadis/ebuild.git">
 	   <link>http://github.com/Fadis/ebuilds</link>
     <description>private ebuilds</description>
   </overlay>
