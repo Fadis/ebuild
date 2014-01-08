@@ -18,7 +18,7 @@ SLOT="0"
 KEYWORDS="~x86 ~amd64"
 IUSE="doc"
 
-DEPEND="virtual/opencl dev-libs/pugixml"
+DEPEND="|| ( virtual/opencl dev-util/nvidia-cuda-toolkit dev-libs/boost dev-cpp/eigen ) dev-libs/pugixml dev-util/cmake"
 RDEPEND="${DEPEND}"
 
 src_unpack() {
@@ -27,14 +27,9 @@ src_unpack() {
 }
 
 src_compile() {
-	cmake-utils_src_compile kernels
+	cmake-utils_src_compile
 }
 
 src_install() {
-	insinto /usr/include
-	doins -r viennacl
-	doins -r ${CMAKE_BUILD_DIR}/viennacl
-	if use doc; then
-		dodoc doc/viennacl.pdf
-	fi
+	cmake-utils_src_install
 }
