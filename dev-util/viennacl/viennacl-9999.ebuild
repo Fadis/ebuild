@@ -16,14 +16,24 @@ SRC_URI=""
 LICENSE="MIT"
 SLOT="0"
 KEYWORDS="~x86 ~amd64"
-IUSE="doc"
+IUSE="opencl cuda openmp boost"
 
-DEPEND="|| ( virtual/opencl dev-util/nvidia-cuda-toolkit dev-libs/boost dev-cpp/eigen ) dev-libs/pugixml dev-util/cmake"
+DEPEND="opencl? ( virtual/opencl ) cuda? ( dev-util/nvidia-cuda-toolkit ) boost? ( dev-libs/boost ) dev-libs/pugixml dev-util/cmake"
 RDEPEND="${DEPEND}"
 
 src_unpack() {
 	git-2_src_unpack
 	cd "${S}"
+}
+
+src_configure() {
+	local mycmakeargs=(
+	  $( cmake-utils_use_enable opencl OPENCL )
+	  $( cmake-utils_use_enable openmp PENMP )
+	  $( cmake-utils_use_enable cuda CUDA )
+	  $( cmake-utils_use_enable boost EXAMPLES )
+	)
+	cmake-utils_src_configure
 }
 
 src_compile() {
