@@ -19,11 +19,6 @@ IUSE="opencl cuda openmp boost"
 DEPEND="opencl? ( virtual/opencl ) cuda? ( dev-util/nvidia-cuda-toolkit ) boost? ( dev-libs/boost ) dev-libs/pugixml dev-util/cmake"
 RDEPEND="${DEPEND}"
 
-src_unpack() {
-	git-2_src_unpack
-	cd "${S}"
-}
-
 src_configure() {
 	local mycmakeargs=(
 	  $( cmake-utils_use_enable opencl OPENCL )
