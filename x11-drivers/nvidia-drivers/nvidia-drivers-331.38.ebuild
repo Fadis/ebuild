@@ -191,7 +191,7 @@ src_compile() {
 			LD="$(tc-getLD)" LDFLAGS="$(raw-ldflags)" || die
 	elif use kernel_linux; then
 		linux-mod_src_compile
-		cp ${NV_SRC}/kernel/uvm/nvidia_uvm.ko ${NV_SRC}/kernel/
+		cp ${NV_SRC}/uvm/nvidia_uvm.ko ${NV_SRC}/kernel/
 	fi
 }
 
