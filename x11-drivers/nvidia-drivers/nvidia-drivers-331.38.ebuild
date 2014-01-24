@@ -116,7 +116,7 @@ pkg_setup() {
 
 	if use kernel_linux; then
 		linux-mod_pkg_setup
-		MODULE_NAMES="nvidia(video:${S}/kernel)"
+		MODULE_NAMES="nvidia(video:${S}/kernel) nvidia_uvm(video:${S}/kernel/uvm)"
 		BUILD_PARAMS="IGNORE_CC_MISMATCH=yes V=1 SYSSRC=${KV_DIR} \
 		SYSOUT=${KV_OUT_DIR} CC=$(tc-getBUILD_CC)"
 		# linux-mod_src_compile calls set_arch_to_kernel, which
@@ -190,8 +190,6 @@ src_compile() {
 		MAKE="$(get_bmake)" CFLAGS="-Wno-sign-compare" emake CC="$(tc-getCC)" \
 			LD="$(tc-getLD)" LDFLAGS="$(raw-ldflags)" || die
 	elif use kernel_linux; then
-		linux-mod_src_compile
-		cd uvm
 		linux-mod_src_compile
 	fi
 }
