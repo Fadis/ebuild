@@ -18,6 +18,7 @@ IUSE="opencl cuda openmp boost"
 
 DEPEND="opencl? ( virtual/opencl ) cuda? ( dev-util/nvidia-cuda-toolkit ) boost? ( dev-libs/boost ) dev-libs/pugixml dev-util/cmake"
 RDEPEND="${DEPEND}"
+S="${WORKDIR}/ViennaCL-1.5.1"
 
 src_configure() {
 	local mycmakeargs=(
