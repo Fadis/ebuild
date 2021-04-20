@@ -1,0 +1,59 @@
+diff -ubr pffft.orig/CMakeLists.txt pffft/CMakeLists.txt
+--- pffft.orig/CMakeLists.txt	2021-03-09 19:40:51.768412559 +0900
++++ pffft/CMakeLists.txt	2021-03-09 19:39:55.544044679 +0900
+@@ -1,6 +1,8 @@
+ cmake_minimum_required(VERSION 2.8)
+ project(PRETTY_FAST_FFT)
+ 
++include(GNUInstallDirs)
++
+ # smaller library size?
+ option(USE_TYPE_FLOAT  "activate single precision 'float'?" ON)
+ option(USE_TYPE_DOUBLE "activate 'double' precision float?" ON)
+@@ -29,7 +31,8 @@
+ set(CMAKE_CXX_STANDARD 98)
+ set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ set(CMAKE_CXX_EXTENSIONS OFF)
+-
++set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -fpic")
++set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -fpic")
+ 
+ if ( (NOT USE_TYPE_FLOAT) AND (NOT USE_TYPE_DOUBLE) )
+   message(FATAL_ERROR "activate at least one of USE_TYPE_FLOAT or USE_TYPE_DOUBLE")
+@@ -154,6 +157,7 @@
+ set_property(TARGET PFFFT APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES
+   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+ )
++install( TARGETS PFFFT )
+ 
+ ######################################################
+ 
+@@ -172,6 +176,7 @@
+   set_property(TARGET PFDSP APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES
+     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+   )
++  install( TARGETS PFDSP )
+ endif()
+ 
+ ######################################################
+@@ -182,6 +187,7 @@
+ set_property(TARGET FFTPACK APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES
+   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+ )
++install( TARGETS FFTPACK )
+ 
+ ######################################################
+ 
+@@ -196,6 +202,7 @@
+   set_property(TARGET PFFASTCONV APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES
+     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+   )
++install( TARGETS PFFASTCONV )
+ endif()
+ 
+ #######################################################
+@@ -365,3 +372,4 @@
+ 
+ endif()
+ 
++install( FILES fftpack.h pffft.h pffastconv.h pffft_double.h pffft.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} )
