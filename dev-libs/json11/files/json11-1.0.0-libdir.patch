@@ -1,0 +1,15 @@
+diff -ubr json11-1.0.0.orig/CMakeLists.txt json11-1.0.0/CMakeLists.txt
+--- json11-1.0.0.orig/CMakeLists.txt	2017-06-21 08:48:22.000000000 +0900
++++ json11-1.0.0/CMakeLists.txt	2021-01-18 18:33:16.866557670 +0900
+@@ -51,7 +51,7 @@
+   add_executable(json11_test test.cpp)
+   target_link_libraries(json11_test json11)
+ endif()
+-
+-install(TARGETS json11 DESTINATION lib/${CMAKE_LIBRARY_ARCHITECTURE})
+-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/json11.hpp" DESTINATION include/${CMAKE_LIBRARY_ARCHITECTURE})
+-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/json11.pc" DESTINATION lib/${CMAKE_LIBRARY_ARCHITECTURE}/pkgconfig)
++include(GNUInstallDirs)
++install(TARGETS json11 DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}/${CMAKE_LIBRARY_ARCHITECTURE})
++install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/json11.hpp" DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}/${CMAKE_LIBRARY_ARCHITECTURE})
++install(FILES "${CMAKE_CURRENT_BINARY_DIR}/json11.pc" DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}/${CMAKE_LIBRARY_ARCHITECTURE}/pkgconfig)
