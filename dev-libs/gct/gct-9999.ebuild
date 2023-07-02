@@ -19,6 +19,7 @@ DEPEND="
 	dev-libs/boost
 	media-libs/glfw
 	dev-libs/vulkan2json
+	dev-util/astc-encoder
 "
 RDEPEND=""
 RESTRICT=""
