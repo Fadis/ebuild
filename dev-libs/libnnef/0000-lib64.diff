@@ -1,0 +1,25 @@
+diff -ubr NNEF-Tools.orig/parser/cpp/CMakeLists.txt NNEF-Tools/parser/cpp/CMakeLists.txt
+--- NNEF-Tools.orig/parser/cpp/CMakeLists.txt	2023-07-02 13:37:44.903570771 +0900
++++ NNEF-Tools/parser/cpp/CMakeLists.txt	2023-07-02 18:03:49.523472911 +0900
+@@ -60,18 +60,15 @@
+ target_link_libraries(${PROJECT_NAME})
+ 
+ # install the library
+-install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}
+-        ARCHIVE DESTINATION lib
+-        LIBRARY DESTINATION lib
+-        RUNTIME DESTINATION bin)
++install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME})
+ 
+ # then the headers
+ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include DESTINATION .)
+ 
+ # generate and install cmake config file for find_package
+-install(EXPORT ${PROJECT_NAME} DESTINATION lib/cmake/${PROJECT_NAME})
++install(EXPORT ${PROJECT_NAME} DESTINATION ${LIBDIR}/cmake/${PROJECT_NAME})
+ 
+ # generate an auxiliary config file also needed by find_package
+ # it just includes the previously generated nnef.cmake
+ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake "include(\${CMAKE_CURRENT_LIST_DIR}/${PROJECT_NAME}.cmake)")
+-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake DESTINATION lib/cmake/${PROJECT_NAME})
++install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake DESTINATION ${LIBDIR}/cmake/${PROJECT_NAME})

@@ -1,0 +1,27 @@
+diff -ubr NNEF-Tools.orig/nnef-pyproject/nnef/cpp/CMakeLists.txt NNEF-Tools/nnef-pyproject/nnef/cpp/CMakeLists.txt
+--- NNEF-Tools.orig/nnef-pyproject/nnef/cpp/CMakeLists.txt	2024-06-05 21:02:25.000000000 +0900
++++ NNEF-Tools/nnef-pyproject/nnef/cpp/CMakeLists.txt	2024-06-06 10:42:52.103558481 +0900
+@@ -61,17 +61,18 @@
+ 
+ # install the library
+ install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}
+-        ARCHIVE DESTINATION lib
+-        LIBRARY DESTINATION lib
+-        RUNTIME DESTINATION bin)
++        ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
++        LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
++        RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
+ 
+ # then the headers
+ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include DESTINATION .)
+ 
+ # generate and install cmake config file for find_package
+-install(EXPORT ${PROJECT_NAME} DESTINATION lib/cmake/${PROJECT_NAME})
++install(EXPORT ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}/cmake/${PROJECT_NAME})
++
+ 
+ # generate an auxiliary config file also needed by find_package
+ # it just includes the previously generated nnef.cmake
+ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake "include(\${CMAKE_CURRENT_LIST_DIR}/${PROJECT_NAME}.cmake)")
+-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake DESTINATION lib/cmake/${PROJECT_NAME})
++install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}/cmake/${PROJECT_NAME})
