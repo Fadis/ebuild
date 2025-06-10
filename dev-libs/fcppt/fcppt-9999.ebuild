@@ -3,9 +3,9 @@
 # $Header: $
 
 
-EAPI=5
+EAPI=8
 
-inherit git-2 cmake-utils
+inherit git-r3 cmake
 
 DESCRIPTION="Freundlich's C++ toolkit (from now on shortened to fcppt) tries to fill in some gaps left by boost and even implements some replacements for a few boost components."
 HOMEPAGE="https://github.com/freundlich/fcppt"
@@ -24,14 +24,14 @@ IUSE=""
 CXXFLAGS="${CXXFLAGS} -std=c++11"
 
 src_configure() {
-	cmake-utils_src_configure
+	cmake_src_configure
 }
 
 src_compile() {
-	cmake-utils_src_compile
+	cmake_src_compile
 }
 
 src_install() {
-	cmake-utils_src_install
+	cmake_src_install
 }
 

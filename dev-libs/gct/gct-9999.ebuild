@@ -1,6 +1,6 @@
 # Copyright 2021 Naomasa Matsubayashi
 # Distributed under the terms of the GNU General Public License v2
-EAPI=7
+EAPI=8
 inherit git-r3 cmake
 
 DESCRIPTION="GPU Computing Toolkit"

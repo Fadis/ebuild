@@ -3,11 +3,11 @@
 # $Header: $
 
 
-EAPI=5
+EAPI=8
 
 inherit multilib
 
-SRC_URI="http://concurrencykit.org/releases/ck-0.3.5.tar.gz"
+SRC_URI="https://github.com/concurrencykit/${PN}/archive/refs/tags/${PV}.tar.gz"
 
 DESCRIPTION="Concurrency primitives, safe memory reclamation mechanisms and non-blocking data structures desgined to aid in the research, design and implementation of high performance concurrent systems."
 HOMEPAGE="http://concurrencykit.org/"
@@ -15,7 +15,7 @@ EGIT_COMMIT="develop"
 
 LICENSE="Boost-1.0"
 
-KEYWORDS="amd64 x86"
+KEYWORDS="amd64"
 
 RDEPEND="app-arch/gzip"
 DEPEND="${RDEPEND}"

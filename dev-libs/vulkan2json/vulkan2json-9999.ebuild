@@ -1,11 +1,11 @@
 # Copyright 2021 Naomasa Matsubayashi
 # Distributed under the terms of the GNU General Public License v2
-EAPI=7
+EAPI=8
 inherit git-r3 cmake
 
 DESCRIPTION="C++ library that implements functions for nlohmann::json to serialize/deserialize Vulkan objects."
 HOMEPAGE="https://github.com/Fadis/vulkan2json"
-EGIT_REPO_URI="https://github.com/Fadis/vulkan2json"
+EGIT_REPO_URI="https://github.com/Fadis/vulkan2json.git"
 #EGIT_COMMIT="master"
 
 LICENSE="MIT"

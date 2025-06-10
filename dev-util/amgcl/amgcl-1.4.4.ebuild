@@ -1,4 +1,4 @@
-# Copyright 2021 Naomasa Matsubayashi
+# Copyright 2025 Naomasa Matsubayashi
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,14 +20,11 @@
 
 EAPI=8
 
-inherit git-r3 cmake
+inherit cmake
 
-DESCRIPTION="Julien Pommier's PFFFT: a pretty fast FFT."
-HOMEPAGE="https://github.com/marton78/pffft"
-EGIT_REPO_URI="https://github.com/marton78/${PN}.git"
-PATCHES=(
-  "${FILESDIR}/${P}-install.patch"
-)
+DESCRIPTION="C++ library for solving large sparse linear systems with algebraic multigrid method"
+HOMEPAGE="https://github.com/ddemidov/amgcl"
+SRC_URI="https://github.com/ddemidov/${PN}/archive/refs/tags/${PV}.tar.gz"
 
 LICENSE="MIT"
 KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~mips ~ppc ~ppc64 ~riscv ~s390 ~sparc ~x86 ~amd64-linux ~x64-macos ~x64-solaris"
@@ -42,19 +39,7 @@ src_prepare() {
 }
 
 src_configure() {
-	local mycmakeargs=(
-		-DUSE_BENCH_FFTW=OFF
-		-DUSE_BENCH_GREEN=OFF
-		-DUSE_BENCH_KISS=OFF
-		-DUSE_BENCH_POCKET=OFF
-		-DUSE_DEBUG_ASAN=OFF
-		-DUSE_SCALAR_VECT=ON
-		-DUSE_SIMD=ON
-		-DUSE_SIMD_NEON=OFF
-		-DUSE_TYPE_DOUBLE=ON
-		-DUSE_TYPE_FLOAT=ON
-	)
-	cmake-utils_src_configure
+	cmake_src_configure
 }
 
 src_compile() {

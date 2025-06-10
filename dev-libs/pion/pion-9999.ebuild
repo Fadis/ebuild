@@ -3,13 +3,13 @@
 # $Header: $
 
 
-EAPI=5
+EAPI=8
 
-inherit git-2 autotools-utils
+inherit git-r3 autotools
 
 DESCRIPTION="C++ framework for building lightweight HTTP interfaces"
 HOMEPAGE="https://github.com/cloudmeter/pion"
-EGIT_REPO_URI="git://github.com/cloudmeter/pion https://github.com/cloudmeter/pion"
+EGIT_REPO_URI="https://github.com/cloudmeter/pion.git"
 EGIT_COMMIT="develop"
 
 LICENSE="Boost-1.0"
@@ -30,14 +30,14 @@ src_configure() {
 	local myeconfargs=(
 	  --with-log4cplus
 	)
-	autotools-utils_src_configure
+	autotools_src_configure
 }
 
 src_compile() {
-	autotools-utils_src_compile
+	autotools_src_compile
 }
 
 src_install() {
-	autotools-utils_src_install
+	autotools_src_install
 }
 

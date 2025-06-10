@@ -18,16 +18,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-EAPI=7
+EAPI=8
 
-inherit git-2 cmake-utils
+inherit git-r3 cmake
 
 DESCRIPTION="C++ classes for reading/writing Standard MIDI Files"
 HOMEPAGE="https://github.com/craigsapp/midifile"
-EGIT_REPO_URI="git://github.com/freundlich/fcppt https://github.com/freundlich/fcppt"
+EGIT_REPO_URI="https://github.com/craigsapp/midifile.git"
 EGIT_COMMIT="master"
 
-LICENSE="Boost-1.0"
+LICENSE="BSD-2"
 
 KEYWORDS=""
 
@@ -39,14 +39,14 @@ IUSE=""
 CXXFLAGS="${CXXFLAGS} -std=c++11"
 
 src_configure() {
-	cmake-utils_src_configure
+	cmake_src_configure
 }
 
 src_compile() {
-	cmake-utils_src_compile
+	cmake_src_compile
 }
 
 src_install() {
-	cmake-utils_src_install
+	cmake_src_install
 }
 

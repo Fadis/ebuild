@@ -3,18 +3,18 @@
 # $Header: $
 
 
-EAPI=5
+EAPI=8
 
-inherit git-2 cmake-utils
+inherit git-r3 cmake
 
 DESCRIPTION="C++11/14 constexpr based Containers, Algorithms, Random numbers, Parsing, Ray tracing, Synthesizer, and others."
 HOMEPAGE="https://github.com/bolero-MURAKAMI/Sprout"
-EGIT_REPO_URI="git://github.com/bolero-MURAKAMI/Sprout https://github.com/bolero-MURAKAMI/Sprout"
+EGIT_REPO_URI="https://github.com/bolero-MURAKAMI/Sprout.gt"
 EGIT_COMMIT="master"
 
 LICENSE="Boost-1.0"
 
-KEYWORDS="amd64 x86"
+KEYWORDS="amd64"
 
 RDEPEND="dev-libs/boost media-libs/opencv"
 DEPEND="${RDEPEND}"
@@ -28,14 +28,14 @@ src_prepare() {
 }
 
 src_configure() {
-	cmake-utils_src_configure
+	cmake_src_configure
 }
 
 src_compile() {
-	cmake-utils_src_compile
+	cmake_src_compile
 }
 
 src_install() {
-	cmake-utils_src_install
+	cmake_src_install
 }
 

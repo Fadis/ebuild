@@ -1,6 +1,6 @@
 # Copyright 2020 Naomasa Matsubayashi
 # Distributed under the terms of the GNU General Public License v2
-EAPI=7
+EAPI=8
 inherit cmake
 
 DESCRIPTION="A C++14/C++17 header-only library for serialization/deserialization of glTF 2.0"

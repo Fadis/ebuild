@@ -1,11 +1,11 @@
 # Copyright 2021 Naomasa Matsubayashi
 # Distributed under the terms of the GNU General Public License v2
-EAPI=7
+EAPI=8
 inherit git-r3 cmake
 
 DESCRIPTION="Lightweight library that provides a C/C++ reflection API for SPIR-V shader bytecode in Vulkan applications"
 HOMEPAGE="https://github.com/KhronosGroup/SPIRV-Reflect"
-EGIT_REPO_URI="https://github.com/KhronosGroup/SPIRV-Reflect"
+EGIT_REPO_URI="https://github.com/KhronosGroup/SPIRV-Reflect.git"
 #EGIT_COMMIT="master"
 
 LICENSE="Apache-2.0"
