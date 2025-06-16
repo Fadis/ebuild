@@ -1,0 +1,20 @@
+import("//build/buildflag_header.gni")
+import("//build/config/linux/pkg_config.gni")
+import("//build/shim_headers.gni")
+
+pkg_config("system_xnnpack") {
+  packages = [ "xnnpack" ]
+}
+
+shim_headers("xnnpack_shim") {
+  root_path = "source/xnnpack"
+  headers = [
+    "xnnpack.h"
+  ]
+}
+
+source_set("xnnpack") {
+  deps = [ ":xnnpack_shim" ]
+  public_configs = [ ":system_xnnpack" ]
+}
+

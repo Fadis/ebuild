@@ -82,7 +82,7 @@ if [[ ${SLOT} != "0/dev" ]]; then
 	KEYWORDS="arm64"
 fi
 
-IUSE_SYSTEM_LIBS="+system-harfbuzz +system-icu +system-png +system-zstd +system-yuv +system-vpx +system-aom"
+IUSE_SYSTEM_LIBS="+system-harfbuzz +system-icu +system-png +system-zstd +system-yuv +system-vpx +system-aom +system-xnnpack"
 IUSE="+X ${IUSE_SYSTEM_LIBS} bindist bundled-toolchain cups debug ffmpeg-chromium gtk4 +hangouts headless kerberos +official pax-kernel pgo"
 IUSE+=" +proprietary-codecs pulseaudio qt6 +rar +screencast selinux test +vaapi +wayland +widevine cpu_flags_ppc_vsx3"
 RESTRICT="
@@ -124,6 +124,7 @@ COMMON_SNAPSHOT_DEPEND="
 	system-yuv? ( >=media-libs/libyuv-1904-r1:= )
 	system-vpx? ( >=media-libs/libvpx-1.14.1:= )
 	system-aom? ( >=media-libs/libaom-3.10.0:= )
+	system-xnnpack? ( >=sci-ml/XNNPACK-2024.11.08-r1:= )
 	>=media-libs/libwebp-0.4.0:=
 	media-libs/mesa:=[gbm(+)]
 	>=media-libs/openh264-1.6.0:=
@@ -427,6 +428,7 @@ src_prepare() {
 		"${FILESDIR}/chromium-137-openh264-include-path.patch"
 		"${FILESDIR}/chromium-137-pdfium-system-libpng.patch"
 	)
+	cp ${FILESDIR}/xnnpack.gn ${WORKDIR}/${P}/build/linux/unbundle/
 
 	if use bundled-toolchain; then
 		# We need to symlink the toolchain into the expected location
@@ -782,7 +784,6 @@ src_prepare() {
 		third_party/wuffs
 		third_party/x11proto
 		third_party/xcbproto
-		third_party/xnnpack
 		third_party/zlib/google
 		third_party/zxcvbn-cpp
 		url/third_party/mozilla
@@ -848,6 +849,9 @@ src_prepare() {
 		keeplibs+=( third_party/libaom/source/libaom/third_party/vector )
 		keeplibs+=( third_party/libaom/source/libaom/third_party/x86inc )
 	fi
+	if ! use system-xnnpack; then
+		keeplibs+=( third_party/xnnpack )
+    fi
 
 	# Arch-specific
 	if use arm64 || use ppc64 ; then
@@ -970,6 +974,9 @@ chromium_configure() {
 	fi
 	if use system-aom; then
 		gn_system_libraries+=( libaom )
+	fi
+	if use system-xnnpack; then
+		gn_system_libraries+=( xnnpack )
 	fi
 
 	build/linux/unbundle/replace_gn_files.py --system-libraries "${gn_system_libraries[@]}" ||
