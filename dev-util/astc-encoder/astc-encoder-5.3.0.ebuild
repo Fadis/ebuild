@@ -4,7 +4,7 @@
 EAPI=8
 
 PYTHON_COMPAT=( python3_{9..11} )
-inherit cmake-multilib python-any-r1
+inherit cmake python-any-r1
 
 if [[ ${PV} == *9999* ]]; then
 	EGIT_REPO_URI="https://github.com/ARM-software/${PN}.git"
@@ -22,9 +22,15 @@ SLOT="0"
 
 BDEPEND="${PYTHON_DEPS}"
 
-multilib_src_configure() {
+src_configure() {
 	local mycmakeargs=(
-		-DENABLE_PCH=OFF
+		-DASTCENC_SHAREDLIB=ON
 	)
 	cmake_src_configure
+}
+
+src_install() {
+	cmake_src_install
+	install -m 755 ${WORKDIR}/${P}_build/Source/libastcenc-native-veneer1.so ${D}/usr/lib64/
+	install -m 755 ${WORKDIR}/${P}_build/Source/libastcenc-native-veneer2.so ${D}/usr/lib64/
 }
