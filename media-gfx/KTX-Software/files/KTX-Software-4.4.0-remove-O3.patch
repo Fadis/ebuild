@@ -1,0 +1,15 @@
+diff '--color=auto' -ubr KTX-Software-4.4.0.orig/CMakeLists.txt KTX-Software-4.4.0/CMakeLists.txt
+--- KTX-Software-4.4.0.orig/CMakeLists.txt	2025-03-30 11:31:07.000000000 +0900
++++ KTX-Software-4.4.0/CMakeLists.txt	2025-09-07 11:23:26.871978061 +0900
+@@ -306,11 +306,8 @@
+ elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU"
+        OR ${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
+     add_compile_options( -Wall -Wextra $<$<BOOL:${KTX_WERROR}>:-Werror>)
+-    add_compile_options( $<IF:$<CONFIG:Debug>,-O0$<SEMICOLON>-g,-O3> )
+     if(EMSCRIPTEN)
+         add_link_options( $<IF:$<CONFIG:Debug>,-gsource-map,-O3> )
+-    else()
+-        add_link_options( $<IF:$<CONFIG:Debug>,-g,-O3> )
+     endif()
+ else()
+     message(FATAL_ERROR "${CMAKE_CXX_COMPILER_ID} not yet supported.")

@@ -1,0 +1,12 @@
+KTX-Software-4.4.0 のみに存在: CMakeLists.txt.orig
+diff '--color=auto' -urb KTX-Software-4.4.0.orig/external/astc-encoder/Source/cmake_core.cmake KTX-Software-4.4.0/external/astc-encoder/Source/cmake_core.cmake
+--- KTX-Software-4.4.0.orig/external/astc-encoder/Source/cmake_core.cmake	2025-03-30 11:31:07.000000000 +0900
++++ KTX-Software-4.4.0/external/astc-encoder/Source/cmake_core.cmake	2025-09-07 11:25:32.841491875 +0900
+@@ -170,7 +170,6 @@
+             $<${is_gnu_fe}:-Wall>
+             $<${is_gnu_fe}:-Wextra>
+             $<${is_gnu_fe}:-Wpedantic>
+-            $<${is_gnu_fe}:-Werror>
+             $<${is_gnu_fe}:-Wshadow>
+             $<${is_gnu_fe}:-Wdouble-promotion>
+             $<${is_clang}:-Wdocumentation>
