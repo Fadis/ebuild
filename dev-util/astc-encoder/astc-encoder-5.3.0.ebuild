@@ -22,6 +22,10 @@ SLOT="0"
 
 BDEPEND="${PYTHON_DEPS}"
 
+PATCHES=(
+  "${FILESDIR}/${P}-disable-march-native.patch"
+)
+
 src_configure() {
 	local mycmakeargs=(
 		-DASTCENC_SHAREDLIB=ON
