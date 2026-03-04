@@ -1,7 +1,22 @@
-diff '--color=auto' -ubr astc-encoder-5.3.0.orig/Source/cmake_core.cmake astc-encoder-5.3.0/Source/cmake_core.cmake
---- astc-encoder-5.3.0.orig/Source/cmake_core.cmake	2025-04-14 17:46:50.000000000 +0900
-+++ astc-encoder-5.3.0/Source/cmake_core.cmake	2026-01-15 03:23:27.092533431 +0900
-@@ -437,8 +437,6 @@
+diff --git a/Source/cmake_core.cmake b/Source/cmake_core.cmake
+index a5de680..eef295e 100644
+--- a/Source/cmake_core.cmake
++++ b/Source/cmake_core.cmake
+@@ -87,11 +87,13 @@ if(${ASTCENC_CLI})
+     # Veneer is compiled without any extended ISA so we can safely do
+     # ISA compatability checks without triggering a SIGILL
+     add_library(${ASTCENC_TARGET}-veneer1
++        STATIC
+         astcenccli_entry.cpp)
+ 
+     # Veneer is compiled with extended ISA but without vector length overrides
+     # so we can safely do SVE vector length compatability checks
+     add_library(${ASTCENC_TARGET}-veneer2
++        STATIC
+         astcenccli_entry2.cpp)
+ 
+     add_executable(${ASTCENC_TARGET}
+@@ -442,8 +444,6 @@ macro(astcenc_set_properties ASTCENC_TARGET_NAME ASTCENC_VENEER_TYPE)
          else()
              target_compile_options(${ASTCENC_TARGET_NAME}
                  PRIVATE

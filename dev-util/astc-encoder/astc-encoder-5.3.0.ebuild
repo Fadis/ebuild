@@ -26,13 +26,6 @@ PATCHES=(
   "${FILESDIR}/${P}-disable-march-native.patch"
 )
 
-src_configure() {
-	local mycmakeargs=(
-		-DASTCENC_SHAREDLIB=ON
-	)
-	cmake_src_configure
-}
-
 src_install() {
 	cmake_src_install
 	install -m 755 ${WORKDIR}/${P}_build/Source/libastcenc-native-veneer1.so ${D}/usr/lib64/
