@@ -1,0 +1,102 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e51b96d..22683cf 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -39,9 +39,8 @@ if( DGF_IS_TOP_LEVEL )
+     set( DGF_BUILD_DGFLIB 1 )
+     set( DGF_BUILD_DGFBAKER 1 )
+     set( DGF_BUILD_DGFTESTER 1 )
+-	set( DGF_BUILD_SAMPLES 1 )
++	set( DGF_BUILD_SAMPLES 0 )
+ else()
+-        
+     # we're a client of somebody else's project, let them control what they want
+     # by default, build only 'DGFLib'
+     message( STATUS "DGFSDK:  Library build detected" )
+@@ -90,6 +89,4 @@ endif()
+ if( DGF_BUILD_DGFTESTER )
+     add_subdirectory(DGFTester)
+ endif()
+-if( DGF_BUILD_SAMPLES )
+-	add_subdirectory(samples)
+-endif()
++
+diff --git a/DGFTester/DGFTester.cpp b/DGFTester/DGFTester.cpp
+index 4336449..16ed163 100644
+--- a/DGFTester/DGFTester.cpp
++++ b/DGFTester/DGFTester.cpp
+@@ -33,6 +33,8 @@
+ #include <chrono>
+ #include <filesystem>
+ 
++#include <cfloat>
++
+ struct Mesh
+ {
+     std::vector<float> vertices; // 3 floats per vertex
+@@ -603,6 +605,36 @@ void PrintClusterSizeStatistics( const DGFBaker::BakerOutput& output )
+     printf("Tris per cluster:    Min: %zu  Max: %3zu Mean: %.2f\n", minTris, maxTris, (double)totalTris / (double)numClusters);
+ }
+ 
++namespace {
++
++int _stricmp(
++   const char *string1,
++   const char *string2
++) {
++  std::size_t i = 0u;
++  while( true ) {
++    if( string1[ i ] == '\0' ) {
++      if( string2[ i ] == '\0' ) {
++        return 0;
++      }
++      else {
++        return 1;
++      }
++    }
++    else if( string2[ i ] == '\0' ) {
++      return -1;
++    }
++    if( string1[ i ] < string2[ i ] ) {
++      return -1;
++    }
++    if( string1[ i ] > string2[ i ] ) {
++      return 1;
++    }
++  }
++  return 0;
++}
++
++}
+ 
+ int main(int argc, char* argv[])
+ {    
+@@ -770,4 +802,4 @@ int main(int argc, char* argv[])
+ 
+     printf("Clean exit\n");
+     return 0;
+-}
+\ No newline at end of file
++}
+diff --git a/external/imgui/CMakeLists.txt b/external/imgui/CMakeLists.txt
+index bb92cfa..3d4cc14 100644
+--- a/external/imgui/CMakeLists.txt
++++ b/external/imgui/CMakeLists.txt
+@@ -3,8 +3,6 @@ TARGET_SOURCES(imgui
+     PRIVATE
+     include/imconfig.h
+     include/imgui/imgui.h
+-    include/imgui/imgui_impl_dx12.h
+-    include/imgui/imgui_impl_win32.h
+     include/imgui/imgui_impl_vulkan.h
+     include/imgui_internal.h
+     include/imstb_rectpack.h
+@@ -14,8 +12,6 @@ TARGET_SOURCES(imgui
+     src/imgui.cpp
+     src/imgui_demo.cpp
+     src/imgui_draw.cpp
+-    src/imgui_impl_dx12.cpp
+-    src/imgui_impl_win32.cpp
+     src/imgui_impl_vulkan.cpp
+     src/imgui_tables.cpp
+     src/imgui_widgets.cpp
