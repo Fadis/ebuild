@@ -1,0 +1,11 @@
+diff '--color=auto' -ubr KTX-Software-4.4.2.orig/external/fmt/include/fmt/format.h KTX-Software-4.4.2/external/fmt/include/fmt/format.h
+--- KTX-Software-4.4.2.orig/external/fmt/include/fmt/format.h	2025-10-04 17:06:54.000000000 +0900
++++ KTX-Software-4.4.2/external/fmt/include/fmt/format.h	2026-03-06 19:13:02.832847853 +0900
+@@ -45,6 +45,7 @@
+ #  include <cstddef>  // std::byte
+ #  include <cstdint>  // uint32_t
+ #  include <cstring>  // std::memcpy
++#  include <cstdlib>  // malloc
+ #  include <limits>   // std::numeric_limits
+ #  include <new>      // std::bad_alloc
+ #  if defined(__GLIBCXX__) && !defined(_GLIBCXX_USE_DUAL_ABI)

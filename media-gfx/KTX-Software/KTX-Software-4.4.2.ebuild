@@ -10,24 +10,18 @@ HOMEPAGE="https://github.com/KhronosGroup/KTX-Software"
 
 LICENSE="Apache-2.0"
 SLOT="0"
-IUSE=""
 
 SRC_URI="https://github.com/KhronosGroup/KTX-Software/archive/refs/tags/v${PV}.tar.gz -> ${P}.tar.gz"
-KEYWORDS="amd64 arm64"
+KEYWORDS="~alpha amd64 ~arm arm64 ~hppa ~ia64 ~mips ~ppc ~ppc64 ~s390 ~sparc ~x86"
 
-RDEPEND="
-"
-DEPEND="
-	${RDEPEND}
-"
 BDEPEND="
 	app-shells/bash
 "
 
-PATCHES=(
-	"${FILESDIR}/${P}-remove-O3.patch"
-	"${FILESDIR}/${P}-remove-Werror.patch"
-)
+PATCHES="
+	${FILESDIR}/${P}-remove-O3.patch
+	${FILESDIR}/${P}-malloc.patch
+"
 
 src_configure() {
 	# basisu_kernels_sse.cpp has a #error if any of those are set
@@ -37,7 +31,6 @@ src_configure() {
 	local mycmakeargs=(
 		-DKTX_VERSION=${PV}
 		-DKTX_FEATURE_TESTS=OFF
-		-DBUILD_SHARED_LIBS=OFF # https://github.com/KhronosGroup/KTX-Software/issues/935
 	)
 
 	cmake_src_configure
@@ -46,3 +39,4 @@ src_configure() {
 src_install() {
 	cmake_src_install
 }
+
