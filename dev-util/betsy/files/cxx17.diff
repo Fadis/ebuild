@@ -1,0 +1,688 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c26ba57..43adec6 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -8,7 +8,7 @@ set( EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}
+ 
+ include( CMake/Bootstrap.cmake )
+ 
+-set( CMAKE_CXX_STANDARD 11 )
++set( CMAKE_CXX_STANDARD 17 )
+ 
+ if( WIN32 )
+ 	set( SDL2_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/SDL/Windows/include" )
+diff --git a/Dependencies/FreeImage/Source/FreeImage/MultiPage.cpp b/Dependencies/FreeImage/Source/FreeImage/MultiPage.cpp
+index 4f26051..b055614 100644
+--- a/Dependencies/FreeImage/Source/FreeImage/MultiPage.cpp
++++ b/Dependencies/FreeImage/Source/FreeImage/MultiPage.cpp
+@@ -37,6 +37,8 @@
+ #include "Utilities.h"
+ #include "FreeImage.h"
+ 
++#include <memory>
++
+ namespace {
+ 
+ // ----------------------------------------------------------
+@@ -271,8 +273,8 @@ FreeImage_OpenMultiBitmap(FREE_IMAGE_FORMAT fif, const char *filename, BOOL crea
+ 					}
+ 				}
+ 
+-				std::auto_ptr<FIMULTIBITMAP> bitmap (new FIMULTIBITMAP);
+-				std::auto_ptr<MULTIBITMAPHEADER> header (new MULTIBITMAPHEADER);
++				std::unique_ptr<FIMULTIBITMAP> bitmap (new FIMULTIBITMAP);
++				std::unique_ptr<MULTIBITMAPHEADER> header (new MULTIBITMAPHEADER);
+ 				header->m_filename = filename;
+ 				// io is default
+ 				header->node = node;
+@@ -337,8 +339,8 @@ FreeImage_OpenMultiBitmapFromHandle(FREE_IMAGE_FORMAT fif, FreeImageIO *io, fi_h
+ 				PluginNode *node = list->FindNodeFromFIF(fif);
+ 			
+ 				if (node) {
+-					std::auto_ptr<FIMULTIBITMAP> bitmap (new FIMULTIBITMAP);
+-					std::auto_ptr<MULTIBITMAPHEADER> header (new MULTIBITMAPHEADER);
++					std::unique_ptr<FIMULTIBITMAP> bitmap (new FIMULTIBITMAP);
++					std::unique_ptr<MULTIBITMAPHEADER> header (new MULTIBITMAPHEADER);
+ 					header->io = *io;
+ 					header->node = node;
+ 					header->fif = fif;
+diff --git a/Dependencies/FreeImage/Source/LibJPEG/example.c b/Dependencies/FreeImage/Source/LibJPEG/example.c
+index 1d6f6cc..6218d4e 100644
+--- a/Dependencies/FreeImage/Source/LibJPEG/example.c
++++ b/Dependencies/FreeImage/Source/LibJPEG/example.c
+@@ -32,7 +32,7 @@
+ 
+ #include <setjmp.h>
+ 
+-
++#include <stdlib.h>
+ 
+ /******************** JPEG COMPRESSION SAMPLE INTERFACE *******************/
+ 
+@@ -376,7 +376,7 @@ read_JPEG_file (char * filename)
+      */
+     (void) jpeg_read_scanlines(&cinfo, buffer, 1);
+     /* Assume put_scanline_someplace wants a pointer and sample count. */
+-    put_scanline_someplace(buffer[0], row_stride);
++    //put_scanline_someplace(buffer[0], row_stride);
+   }
+ 
+   /* Step 7: Finish decompression */
+diff --git a/Dependencies/FreeImage/Source/LibJPEG/jmemname.c b/Dependencies/FreeImage/Source/LibJPEG/jmemname.c
+index ed96dee..45659fb 100644
+--- a/Dependencies/FreeImage/Source/LibJPEG/jmemname.c
++++ b/Dependencies/FreeImage/Source/LibJPEG/jmemname.c
+@@ -17,6 +17,8 @@
+ #include "jpeglib.h"
+ #include "jmemsys.h"		/* import the system-dependent declarations */
+ 
++#include <unistd.h>
++
+ #ifndef HAVE_STDLIB_H		/* <stdlib.h> should declare malloc(),free() */
+ extern void * malloc JPP((size_t size));
+ extern void free JPP((void *ptr));
+diff --git a/Dependencies/FreeImage/Source/LibOpenJPEG/cidx_manager.c b/Dependencies/FreeImage/Source/LibOpenJPEG/cidx_manager.c
+index 42f87c2..8e5aaf8 100644
+--- a/Dependencies/FreeImage/Source/LibOpenJPEG/cidx_manager.c
++++ b/Dependencies/FreeImage/Source/LibOpenJPEG/cidx_manager.c
+@@ -46,6 +46,8 @@ void opj_write_cptr(int coff, int clen, opj_stream_private_t *cio,
+ 
+ 
+ 
++OPJ_BOOL opj_check_EPHuse( int coff, opj_marker_info_t *markers, int marknum, opj_stream_private_t *cio,
++              opj_event_mgr_t * p_manager );
+ 
+ int opj_write_cidx( int offset, opj_stream_private_t *cio, opj_codestream_info_t cstr_info, int j2klen,
+               opj_event_mgr_t * p_manager )
+diff --git a/Dependencies/FreeImage/Source/LibTIFF4/mkspans.c b/Dependencies/FreeImage/Source/LibTIFF4/mkspans.c
+index 3d70cd2..8ace5f4 100644
+--- a/Dependencies/FreeImage/Source/LibTIFF4/mkspans.c
++++ b/Dependencies/FreeImage/Source/LibTIFF4/mkspans.c
+@@ -30,10 +30,7 @@
+  * runs of zeros and ones in Group 3 Fax encoding.
+  */
+ 
+-dumparray(name, runs)
+-	char *name;
+-	unsigned char runs[256];
+-{
++void dumparray( char *name, unsigned char runs[256] ) {
+ 	int i;
+ 	char *sep;
+ 	printf("static unsigned char %s[256] = {\n", name);
+@@ -49,7 +46,7 @@ dumparray(name, runs)
+ 	printf("\n};\n");
+ }
+ 
+-main()
++int main()
+ {
+ 	unsigned char runs[2][256];
+ 
+diff --git a/Dependencies/FreeImage/Source/OpenEXR/Half/half.cpp b/Dependencies/FreeImage/Source/OpenEXR/Half/half.cpp
+index 609aaa1..9b5ae81 100644
+--- a/Dependencies/FreeImage/Source/OpenEXR/Half/half.cpp
++++ b/Dependencies/FreeImage/Source/OpenEXR/Half/half.cpp
+@@ -71,7 +71,7 @@ half::overflow ()
+ 
+     for (int i = 0; i < 10; i++)	
+ 	f *= f;				// this will overflow before
+-					// the for­loop terminates
++					// the for?loop terminates
+     return f;
+ }
+ 
+@@ -94,9 +94,9 @@ half::convert (int i)
+     // of float and half (127 versus 15).
+     //
+ 
+-    register int s =  (i >> 16) & 0x00008000;
+-    register int e = ((i >> 23) & 0x000000ff) - (127 - 15);
+-    register int m =   i        & 0x007fffff;
++    int s =  (i >> 16) & 0x00008000;
++    int e = ((i >> 23) & 0x000000ff) - (127 - 15);
++    int m =   i        & 0x007fffff;
+ 
+     //
+     // Now reassemble s, e and m into a half:
+diff --git a/Dependencies/FreeImage/Source/OpenEXR/Half/half.h b/Dependencies/FreeImage/Source/OpenEXR/Half/half.h
+index f78e4f6..da418d6 100644
+--- a/Dependencies/FreeImage/Source/OpenEXR/Half/half.h
++++ b/Dependencies/FreeImage/Source/OpenEXR/Half/half.h
+@@ -459,7 +459,7 @@ half::half (float f)
+ 	// to do the float-to-half conversion.
+ 	//
+ 
+-	register int e = (x.i >> 23) & 0x000001ff;
++	int e = (x.i >> 23) & 0x000001ff;
+ 
+ 	e = _eLut[e];
+ 
+@@ -470,7 +470,7 @@ half::half (float f)
+ 	    // bits and combine it with the sign and exponent.
+ 	    //
+ 
+-	    register int m = x.i & 0x007fffff;
++	    int m = x.i & 0x007fffff;
+ 	    _h = e + ((m + 0x00000fff + ((m >> 13) & 1)) >> 13);
+ 	}
+ 	else
+diff --git a/Dependencies/FreeImage/Source/OpenEXR/IlmImf/ImfAttribute.cpp b/Dependencies/FreeImage/Source/OpenEXR/IlmImf/ImfAttribute.cpp
+index cb4ac36..a69840e 100644
+--- a/Dependencies/FreeImage/Source/OpenEXR/IlmImf/ImfAttribute.cpp
++++ b/Dependencies/FreeImage/Source/OpenEXR/IlmImf/ImfAttribute.cpp
+@@ -63,7 +63,7 @@ Attribute::~Attribute () {}
+ 
+ namespace {
+ 
+-struct NameCompare: std::binary_function <const char *, const char *, bool>
++struct NameCompare
+ {
+     bool
+     operator () (const char *x, const char *y) const
+diff --git a/Dependencies/FreeImage/Source/OpenEXR/Imath/ImathMatrix.h b/Dependencies/FreeImage/Source/OpenEXR/Imath/ImathMatrix.h
+index 3e96c2f..491729d 100644
+--- a/Dependencies/FreeImage/Source/OpenEXR/Imath/ImathMatrix.h
++++ b/Dependencies/FreeImage/Source/OpenEXR/Imath/ImathMatrix.h
+@@ -263,16 +263,16 @@ template <class T> class Matrix33
+     //------------------------------------------------------------
+ 
+     const Matrix33 &    invert (bool singExc = false)
+-                        throw (IEX_NAMESPACE::MathExc);
++                       ;
+ 
+     Matrix33<T>         inverse (bool singExc = false) const
+-                        throw (IEX_NAMESPACE::MathExc);
++                       ;
+ 
+     const Matrix33 &    gjInvert (bool singExc = false)
+-                        throw (IEX_NAMESPACE::MathExc);
++                       ;
+ 
+     Matrix33<T>         gjInverse (bool singExc = false) const
+-                        throw (IEX_NAMESPACE::MathExc);
++                       ;
+ 
+ 
+     //------------------------------------------------
+@@ -637,16 +637,16 @@ template <class T> class Matrix44
+     //------------------------------------------------------------
+ 
+     const Matrix44 &    invert (bool singExc = false)
+-                        throw (IEX_NAMESPACE::MathExc);
++                       ;
+ 
+     Matrix44<T>         inverse (bool singExc = false) const
+-                        throw (IEX_NAMESPACE::MathExc);
++                       ;
+ 
+     const Matrix44 &    gjInvert (bool singExc = false)
+-                        throw (IEX_NAMESPACE::MathExc);
++                       ;
+ 
+     Matrix44<T>         gjInverse (bool singExc = false) const
+-                        throw (IEX_NAMESPACE::MathExc);
++                       ;
+ 
+ 
+     //------------------------------------------------
+@@ -1430,7 +1430,7 @@ Matrix33<T>::transposed () const
+ 
+ template <class T>
+ const Matrix33<T> &
+-Matrix33<T>::gjInvert (bool singExc) throw (IEX_NAMESPACE::MathExc)
++Matrix33<T>::gjInvert (bool singExc)
+ {
+     *this = gjInverse (singExc);
+     return *this;
+@@ -1438,7 +1438,7 @@ Matrix33<T>::gjInvert (bool singExc) throw (IEX_NAMESPACE::MathExc)
+ 
+ template <class T>
+ Matrix33<T>
+-Matrix33<T>::gjInverse (bool singExc) const throw (IEX_NAMESPACE::MathExc)
++Matrix33<T>::gjInverse (bool singExc) const
+ {
+     int i, j, k;
+     Matrix33 s;
+@@ -1542,7 +1542,7 @@ Matrix33<T>::gjInverse (bool singExc) const throw (IEX_NAMESPACE::MathExc)
+ 
+ template <class T>
+ const Matrix33<T> &
+-Matrix33<T>::invert (bool singExc) throw (IEX_NAMESPACE::MathExc)
++Matrix33<T>::invert (bool singExc)
+ {
+     *this = inverse (singExc);
+     return *this;
+@@ -1550,7 +1550,7 @@ Matrix33<T>::invert (bool singExc) throw (IEX_NAMESPACE::MathExc)
+ 
+ template <class T>
+ Matrix33<T>
+-Matrix33<T>::inverse (bool singExc) const throw (IEX_NAMESPACE::MathExc)
++Matrix33<T>::inverse (bool singExc) const
+ {
+     if (x[0][2] != 0 || x[1][2] != 0 || x[2][2] != 1)
+     {
+@@ -2527,11 +2527,11 @@ Matrix44<T>::multiply (const Matrix44<T> &a,
+                        const Matrix44<T> &b,
+                        Matrix44<T> &c)
+ {
+-    register const T * IMATH_RESTRICT ap = &a.x[0][0];
+-    register const T * IMATH_RESTRICT bp = &b.x[0][0];
+-    register       T * IMATH_RESTRICT cp = &c.x[0][0];
++    const T * IMATH_RESTRICT ap = &a.x[0][0];
++    const T * IMATH_RESTRICT bp = &b.x[0][0];
++          T * IMATH_RESTRICT cp = &c.x[0][0];
+ 
+-    register T a0, a1, a2, a3;
++    T a0, a1, a2, a3;
+ 
+     a0 = ap[0];
+     a1 = ap[1];
+@@ -2699,7 +2699,7 @@ Matrix44<T>::transposed () const
+ 
+ template <class T>
+ const Matrix44<T> &
+-Matrix44<T>::gjInvert (bool singExc) throw (IEX_NAMESPACE::MathExc)
++Matrix44<T>::gjInvert (bool singExc)
+ {
+     *this = gjInverse (singExc);
+     return *this;
+@@ -2707,7 +2707,7 @@ Matrix44<T>::gjInvert (bool singExc) throw (IEX_NAMESPACE::MathExc)
+ 
+ template <class T>
+ Matrix44<T>
+-Matrix44<T>::gjInverse (bool singExc) const throw (IEX_NAMESPACE::MathExc)
++Matrix44<T>::gjInverse (bool singExc) const
+ {
+     int i, j, k;
+     Matrix44 s;
+@@ -2811,7 +2811,7 @@ Matrix44<T>::gjInverse (bool singExc) const throw (IEX_NAMESPACE::MathExc)
+ 
+ template <class T>
+ const Matrix44<T> &
+-Matrix44<T>::invert (bool singExc) throw (IEX_NAMESPACE::MathExc)
++Matrix44<T>::invert (bool singExc)
+ {
+     *this = inverse (singExc);
+     return *this;
+@@ -2819,7 +2819,7 @@ Matrix44<T>::invert (bool singExc) throw (IEX_NAMESPACE::MathExc)
+ 
+ template <class T>
+ Matrix44<T>
+-Matrix44<T>::inverse (bool singExc) const throw (IEX_NAMESPACE::MathExc)
++Matrix44<T>::inverse (bool singExc) const
+ {
+     if (x[0][3] != 0 || x[1][3] != 0 || x[2][3] != 0 || x[3][3] != 1)
+         return gjInverse(singExc);
+diff --git a/Dependencies/FreeImage/Source/OpenEXR/Imath/ImathVec.cpp b/Dependencies/FreeImage/Source/OpenEXR/Imath/ImathVec.cpp
+index 5e5b210..37edc97 100644
+--- a/Dependencies/FreeImage/Source/OpenEXR/Imath/ImathVec.cpp
++++ b/Dependencies/FreeImage/Source/OpenEXR/Imath/ImathVec.cpp
+@@ -149,7 +149,7 @@ Vec2<short>::normalize ()
+ template <>
+ IMATH_EXPORT
+ const Vec2<short> &
+-Vec2<short>::normalizeExc () throw (IEX_NAMESPACE::MathExc)
++Vec2<short>::normalizeExc ()
+ {
+     if ((x == 0) && (y == 0))
+         throw NullVecExc ("Cannot normalize null vector.");
+@@ -180,7 +180,7 @@ Vec2<short>::normalized () const
+ template <>
+ IMATH_EXPORT
+ Vec2<short>
+-Vec2<short>::normalizedExc () const throw (IEX_NAMESPACE::MathExc)
++Vec2<short>::normalizedExc () const
+ {
+     if ((x == 0) && (y == 0))
+         throw NullVecExc ("Cannot normalize null vector.");
+@@ -225,7 +225,7 @@ Vec2<int>::normalize ()
+ template <>
+ IMATH_EXPORT
+ const Vec2<int> &
+-Vec2<int>::normalizeExc () throw (IEX_NAMESPACE::MathExc)
++Vec2<int>::normalizeExc ()
+ {
+     if ((x == 0) && (y == 0))
+         throw NullVecExc ("Cannot normalize null vector.");
+@@ -256,7 +256,7 @@ Vec2<int>::normalized () const
+ template <>
+ IMATH_EXPORT
+ Vec2<int>
+-Vec2<int>::normalizedExc () const throw (IEX_NAMESPACE::MathExc)
++Vec2<int>::normalizedExc () const
+ {
+     if ((x == 0) && (y == 0))
+         throw NullVecExc ("Cannot normalize null vector.");
+@@ -301,7 +301,7 @@ Vec3<short>::normalize ()
+ template <>
+ IMATH_EXPORT
+ const Vec3<short> &
+-Vec3<short>::normalizeExc () throw (IEX_NAMESPACE::MathExc)
++Vec3<short>::normalizeExc ()
+ {
+     if ((x == 0) && (y == 0) && (z == 0))
+         throw NullVecExc ("Cannot normalize null vector.");
+@@ -332,7 +332,7 @@ Vec3<short>::normalized () const
+ template <>
+ IMATH_EXPORT
+ Vec3<short>
+-Vec3<short>::normalizedExc () const throw (IEX_NAMESPACE::MathExc)
++Vec3<short>::normalizedExc () const
+ {
+     if ((x == 0) && (y == 0) && (z == 0))
+         throw NullVecExc ("Cannot normalize null vector.");
+@@ -377,7 +377,7 @@ Vec3<int>::normalize ()
+ template <>
+ IMATH_EXPORT
+ const Vec3<int> &
+-Vec3<int>::normalizeExc () throw (IEX_NAMESPACE::MathExc)
++Vec3<int>::normalizeExc ()
+ {
+     if ((x == 0) && (y == 0) && (z == 0))
+         throw NullVecExc ("Cannot normalize null vector.");
+@@ -408,7 +408,7 @@ Vec3<int>::normalized () const
+ template <>
+ IMATH_EXPORT
+ Vec3<int>
+-Vec3<int>::normalizedExc () const throw (IEX_NAMESPACE::MathExc)
++Vec3<int>::normalizedExc () const
+ {
+     if ((x == 0) && (y == 0) && (z == 0))
+         throw NullVecExc ("Cannot normalize null vector.");
+@@ -453,7 +453,7 @@ Vec4<short>::normalize ()
+ template <>
+ IMATH_EXPORT
+ const Vec4<short> &
+-Vec4<short>::normalizeExc () throw (IEX_NAMESPACE::MathExc)
++Vec4<short>::normalizeExc ()
+ {
+     if ((x == 0) && (y == 0) && (z == 0) && (w == 0))
+         throw NullVecExc ("Cannot normalize null vector.");
+@@ -484,7 +484,7 @@ Vec4<short>::normalized () const
+ template <>
+ IMATH_EXPORT
+ Vec4<short>
+-Vec4<short>::normalizedExc () const throw (IEX_NAMESPACE::MathExc)
++Vec4<short>::normalizedExc () const
+ {
+     if ((x == 0) && (y == 0) && (z == 0) && (w == 0))
+         throw NullVecExc ("Cannot normalize null vector.");
+@@ -529,7 +529,7 @@ Vec4<int>::normalize ()
+ template <>
+ IMATH_EXPORT
+ const Vec4<int> &
+-Vec4<int>::normalizeExc () throw (IEX_NAMESPACE::MathExc)
++Vec4<int>::normalizeExc ()
+ {
+     if ((x == 0) && (y == 0) && (z == 0) && (w == 0))
+         throw NullVecExc ("Cannot normalize null vector.");
+@@ -560,7 +560,7 @@ Vec4<int>::normalized () const
+ template <>
+ IMATH_EXPORT
+ Vec4<int>
+-Vec4<int>::normalizedExc () const throw (IEX_NAMESPACE::MathExc)
++Vec4<int>::normalizedExc () const
+ {
+     if ((x == 0) && (y == 0) && (z == 0) && (w == 0))
+         throw NullVecExc ("Cannot normalize null vector.");
+diff --git a/Dependencies/FreeImage/Source/OpenEXR/Imath/ImathVec.h b/Dependencies/FreeImage/Source/OpenEXR/Imath/ImathVec.h
+index fb859eb..6f4e82a 100644
+--- a/Dependencies/FreeImage/Source/OpenEXR/Imath/ImathVec.h
++++ b/Dependencies/FreeImage/Source/OpenEXR/Imath/ImathVec.h
+@@ -225,11 +225,11 @@ template <class T> class Vec2
+     T			length2 () const;
+ 
+     const Vec2 &	normalize ();           // modifies *this
+-    const Vec2 &	normalizeExc () throw (IEX_NAMESPACE::MathExc);
++    const Vec2 &	normalizeExc ();
+     const Vec2 &	normalizeNonNull ();
+ 
+     Vec2<T>		normalized () const;	// does not modify *this
+-    Vec2<T>		normalizedExc () const throw (IEX_NAMESPACE::MathExc);
++    Vec2<T>		normalizedExc () const;
+     Vec2<T>		normalizedNonNull () const;
+ 
+ 
+@@ -437,11 +437,11 @@ template <class T> class Vec3
+     T			length2 () const;
+ 
+     const Vec3 &	normalize ();           // modifies *this
+-    const Vec3 &	normalizeExc () throw (IEX_NAMESPACE::MathExc);
++    const Vec3 &	normalizeExc ();
+     const Vec3 &	normalizeNonNull ();
+ 
+     Vec3<T>		normalized () const;	// does not modify *this
+-    Vec3<T>		normalizedExc () const throw (IEX_NAMESPACE::MathExc);
++    Vec3<T>		normalizedExc () const;
+     Vec3<T>		normalizedNonNull () const;
+ 
+ 
+@@ -619,11 +619,11 @@ template <class T> class Vec4
+     T               length2 () const;
+ 
+     const Vec4 &    normalize ();           // modifies *this
+-    const Vec4 &    normalizeExc () throw (IEX_NAMESPACE::MathExc);
++    const Vec4 &    normalizeExc ();
+     const Vec4 &    normalizeNonNull ();
+ 
+     Vec4<T>         normalized () const;	// does not modify *this
+-    Vec4<T>         normalizedExc () const throw (IEX_NAMESPACE::MathExc);
++    Vec4<T>         normalizedExc () const;
+     Vec4<T>         normalizedNonNull () const;
+ 
+ 
+@@ -711,7 +711,7 @@ template <> const Vec2<short> &
+ Vec2<short>::normalize ();
+ 
+ template <> const Vec2<short> &
+-Vec2<short>::normalizeExc () throw (IEX_NAMESPACE::MathExc);
++Vec2<short>::normalizeExc ();
+ 
+ template <> const Vec2<short> &
+ Vec2<short>::normalizeNonNull ();
+@@ -720,7 +720,7 @@ template <> Vec2<short>
+ Vec2<short>::normalized () const;
+ 
+ template <> Vec2<short>
+-Vec2<short>::normalizedExc () const throw (IEX_NAMESPACE::MathExc);
++Vec2<short>::normalizedExc () const;
+ 
+ template <> Vec2<short>
+ Vec2<short>::normalizedNonNull () const;
+@@ -735,7 +735,7 @@ template <> const Vec2<int> &
+ Vec2<int>::normalize ();
+ 
+ template <> const Vec2<int> &
+-Vec2<int>::normalizeExc () throw (IEX_NAMESPACE::MathExc);
++Vec2<int>::normalizeExc ();
+ 
+ template <> const Vec2<int> &
+ Vec2<int>::normalizeNonNull ();
+@@ -744,7 +744,7 @@ template <> Vec2<int>
+ Vec2<int>::normalized () const;
+ 
+ template <> Vec2<int>
+-Vec2<int>::normalizedExc () const throw (IEX_NAMESPACE::MathExc);
++Vec2<int>::normalizedExc () const;
+ 
+ template <> Vec2<int>
+ Vec2<int>::normalizedNonNull () const;
+@@ -759,7 +759,7 @@ template <> const Vec3<short> &
+ Vec3<short>::normalize ();
+ 
+ template <> const Vec3<short> &
+-Vec3<short>::normalizeExc () throw (IEX_NAMESPACE::MathExc);
++Vec3<short>::normalizeExc ();
+ 
+ template <> const Vec3<short> &
+ Vec3<short>::normalizeNonNull ();
+@@ -768,7 +768,7 @@ template <> Vec3<short>
+ Vec3<short>::normalized () const;
+ 
+ template <> Vec3<short>
+-Vec3<short>::normalizedExc () const throw (IEX_NAMESPACE::MathExc);
++Vec3<short>::normalizedExc () const;
+ 
+ template <> Vec3<short>
+ Vec3<short>::normalizedNonNull () const;
+@@ -783,7 +783,7 @@ template <> const Vec3<int> &
+ Vec3<int>::normalize ();
+ 
+ template <> const Vec3<int> &
+-Vec3<int>::normalizeExc () throw (IEX_NAMESPACE::MathExc);
++Vec3<int>::normalizeExc ();
+ 
+ template <> const Vec3<int> &
+ Vec3<int>::normalizeNonNull ();
+@@ -792,7 +792,7 @@ template <> Vec3<int>
+ Vec3<int>::normalized () const;
+ 
+ template <> Vec3<int>
+-Vec3<int>::normalizedExc () const throw (IEX_NAMESPACE::MathExc);
++Vec3<int>::normalizedExc () const;
+ 
+ template <> Vec3<int>
+ Vec3<int>::normalizedNonNull () const;
+@@ -806,7 +806,7 @@ template <> const Vec4<short> &
+ Vec4<short>::normalize ();
+ 
+ template <> const Vec4<short> &
+-Vec4<short>::normalizeExc () throw (IEX_NAMESPACE::MathExc);
++Vec4<short>::normalizeExc ();
+ 
+ template <> const Vec4<short> &
+ Vec4<short>::normalizeNonNull ();
+@@ -815,7 +815,7 @@ template <> Vec4<short>
+ Vec4<short>::normalized () const;
+ 
+ template <> Vec4<short>
+-Vec4<short>::normalizedExc () const throw (IEX_NAMESPACE::MathExc);
++Vec4<short>::normalizedExc () const;
+ 
+ template <> Vec4<short>
+ Vec4<short>::normalizedNonNull () const;
+@@ -830,7 +830,7 @@ template <> const Vec4<int> &
+ Vec4<int>::normalize ();
+ 
+ template <> const Vec4<int> &
+-Vec4<int>::normalizeExc () throw (IEX_NAMESPACE::MathExc);
++Vec4<int>::normalizeExc ();
+ 
+ template <> const Vec4<int> &
+ Vec4<int>::normalizeNonNull ();
+@@ -839,7 +839,7 @@ template <> Vec4<int>
+ Vec4<int>::normalized () const;
+ 
+ template <> Vec4<int>
+-Vec4<int>::normalizedExc () const throw (IEX_NAMESPACE::MathExc);
++Vec4<int>::normalizedExc () const;
+ 
+ template <> Vec4<int>
+ Vec4<int>::normalizedNonNull () const;
+@@ -1209,7 +1209,7 @@ Vec2<T>::normalize ()
+ 
+ template <class T>
+ const Vec2<T> &
+-Vec2<T>::normalizeExc () throw (IEX_NAMESPACE::MathExc)
++Vec2<T>::normalizeExc ()
+ {
+     T l = length();
+ 
+@@ -1246,7 +1246,7 @@ Vec2<T>::normalized () const
+ 
+ template <class T>
+ Vec2<T>
+-Vec2<T>::normalizedExc () const throw (IEX_NAMESPACE::MathExc)
++Vec2<T>::normalizedExc () const
+ {
+     T l = length();
+ 
+@@ -1701,7 +1701,7 @@ Vec3<T>::normalize ()
+ 
+ template <class T>
+ const Vec3<T> &
+-Vec3<T>::normalizeExc () throw (IEX_NAMESPACE::MathExc)
++Vec3<T>::normalizeExc ()
+ {
+     T l = length();
+ 
+@@ -1740,7 +1740,7 @@ Vec3<T>::normalized () const
+ 
+ template <class T>
+ Vec3<T>
+-Vec3<T>::normalizedExc () const throw (IEX_NAMESPACE::MathExc)
++Vec3<T>::normalizedExc () const
+ {
+     T l = length();
+ 
+@@ -2106,7 +2106,7 @@ Vec4<T>::normalize ()
+ 
+ template <class T>
+ const Vec4<T> &
+-Vec4<T>::normalizeExc () throw (IEX_NAMESPACE::MathExc)
++Vec4<T>::normalizeExc ()
+ {
+     T l = length();
+ 
+@@ -2147,7 +2147,7 @@ Vec4<T>::normalized () const
+ 
+ template <class T>
+ Vec4<T>
+-Vec4<T>::normalizedExc () const throw (IEX_NAMESPACE::MathExc)
++Vec4<T>::normalizedExc () const
+ {
+     T l = length();
+ 
+diff --git a/Dependencies/FreeImage/Source/ZLib/gzlib.c b/Dependencies/FreeImage/Source/ZLib/gzlib.c
+index 4105e6a..07977ac 100644
+--- a/Dependencies/FreeImage/Source/ZLib/gzlib.c
++++ b/Dependencies/FreeImage/Source/ZLib/gzlib.c
+@@ -5,6 +5,9 @@
+ 
+ #include "gzguts.h"
+ 
++#include <sys/types.h>
++#include <unistd.h>
++
+ #if defined(_WIN32) && !defined(__BORLANDC__) && !defined(__MINGW32__)
+ #  define LSEEK _lseeki64
+ #else
+diff --git a/Dependencies/FreeImage/Source/ZLib/gzread.c b/Dependencies/FreeImage/Source/ZLib/gzread.c
+index 956b91e..bfddca6 100644
+--- a/Dependencies/FreeImage/Source/ZLib/gzread.c
++++ b/Dependencies/FreeImage/Source/ZLib/gzread.c
+@@ -5,6 +5,8 @@
+ 
+ #include "gzguts.h"
+ 
++#include <unistd.h>
++
+ /* Local functions */
+ local int gz_load OF((gz_statep, unsigned char *, unsigned, unsigned *));
+ local int gz_avail OF((gz_statep));
+diff --git a/Dependencies/FreeImage/Source/ZLib/gzwrite.c b/Dependencies/FreeImage/Source/ZLib/gzwrite.c
+index c7b5651..06592d2 100644
+--- a/Dependencies/FreeImage/Source/ZLib/gzwrite.c
++++ b/Dependencies/FreeImage/Source/ZLib/gzwrite.c
+@@ -5,6 +5,8 @@
+ 
+ #include "gzguts.h"
+ 
++#include <unistd.h>
++
+ /* Local functions */
+ local int gz_init OF((gz_statep));
+ local int gz_comp OF((gz_statep, int));
+diff --git a/src/AmalgamationEnum.cpp b/src/AmalgamationEnum.cpp
+index 802fb2a..dfd52df 100644
+--- a/src/AmalgamationEnum.cpp
++++ b/src/AmalgamationEnum.cpp
+@@ -2,6 +2,7 @@
+ 
+ #include <algorithm>
+ #include <stdexcept>
++#include <string>
+ 
+ const std::string BLANKSTRING = "";
+ 
