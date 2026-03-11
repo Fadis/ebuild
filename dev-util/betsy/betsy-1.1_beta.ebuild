@@ -35,5 +35,10 @@ src_compile() {
 src_install() {
 	mkdir -p ${D}/usr/bin
 	install -m 755 ${WORKDIR}/${P}/bin/RelWithDebInfo/betsy ${D}/usr/bin
+	mkdir -p ${D}/usr/share/betsy/Data
+	for FILE in $(find ${WORKDIR}/${P}/bin/Data -name '*.glsl')
+	do
+		install -m 644 ${FILE} ${D}/usr/share/betsy/Data
+	done
 }
 

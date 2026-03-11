@@ -686,3 +686,143 @@ index 802fb2a..dfd52df 100644
  
  const std::string BLANKSTRING = "";
  
+diff --git a/src/betsy/EncoderBC1.cpp b/src/betsy/EncoderBC1.cpp
+index 4cdccd7..d1e4399 100644
+--- a/src/betsy/EncoderBC1.cpp
++++ b/src/betsy/EncoderBC1.cpp
+@@ -67,7 +67,7 @@ namespace betsy
+ 			m_bc1TablesSsbo = createUavBuffer( sizeof( Bc1Tables ), &bc1Tables );
+ 		}
+ 
+-		m_bc1Pso = createComputePsoFromFile( bDither ? "bc1_dither.glsl" : "bc1.glsl", "../Data/" );
++		m_bc1Pso = createComputePsoFromFile( bDither ? "bc1_dither.glsl" : "bc1.glsl", "/usr/share/betsy/Data/" );
+ 
+ 		if( useBC3 )
+ 		{
+@@ -77,8 +77,8 @@ namespace betsy
+ 			m_stitchedTarget =
+ 				createTexture( TextureParams( getBlockWidth(), getBlockHeight(), PFG_RGBA32_UINT,
+ 											  "m_stitchedTarget", TextureFlags::Uav ) );
+-			m_bc4Pso = createComputePsoFromFile( "bc4.glsl", "../Data/" );
+-			m_stitchPso = createComputePsoFromFile( "etc2_rgba_stitch.glsl", "../Data/" );
++			m_bc4Pso = createComputePsoFromFile( "bc4.glsl", "/usr/share/betsy/Data/" );
++			m_stitchPso = createComputePsoFromFile( "etc2_rgba_stitch.glsl", "/usr/share/betsy/Data/" );
+ 		}
+ 
+ 		StagingTexture stagingTex = createStagingTexture( m_width, m_height, srcImage.format, true );
+diff --git a/src/betsy/EncoderBC4.cpp b/src/betsy/EncoderBC4.cpp
+index 37b0e1f..15f150a 100644
+--- a/src/betsy/EncoderBC4.cpp
++++ b/src/betsy/EncoderBC4.cpp
+@@ -44,14 +44,14 @@ namespace betsy
+ 											  "m_bc4TargetRes[1]", TextureFlags::Uav ) );
+ 		}
+ 
+-		m_bc4Pso = createComputePsoFromFile( "bc4.glsl", "../Data/" );
++		m_bc4Pso = createComputePsoFromFile( "bc4.glsl", "/usr/share/betsy/Data/" );
+ 
+ 		if( redGreen )
+ 		{
+ 			m_stitchedTarget =
+ 				createTexture( TextureParams( getBlockWidth(), getBlockHeight(), PFG_RGBA32_UINT,
+ 											  "m_stitchedTarget", TextureFlags::Uav ) );
+-			m_stitchPso = createComputePsoFromFile( "etc2_rgba_stitch.glsl", "../Data/" );
++			m_stitchPso = createComputePsoFromFile( "etc2_rgba_stitch.glsl", "/usr/share/betsy/Data/" );
+ 
+ 			m_dstTexture = createTexture( TextureParams(
+ 				m_width, m_height, m_encodeSNorm ? PFG_BC5_SNORM : PFG_BC5_UNORM, "m_dstTexture" ) );
+diff --git a/src/betsy/EncoderBC6H.cpp b/src/betsy/EncoderBC6H.cpp
+index fae7a50..1824e51 100644
+--- a/src/betsy/EncoderBC6H.cpp
++++ b/src/betsy/EncoderBC6H.cpp
+@@ -27,7 +27,7 @@ namespace betsy
+ 		m_dstTexture =
+ 			createTexture( TextureParams( m_width, m_height, PFG_BC6H_UF16, "m_dstTexture" ) );
+ 
+-		m_compressPso = createComputePsoFromFile( "bc6h.glsl", "../Data/" );
++		m_compressPso = createComputePsoFromFile( "bc6h.glsl", "/usr/share/betsy/Data/" );
+ 
+ 		StagingTexture stagingTex = createStagingTexture( m_width, m_height, srcImage.format, true );
+ 		memcpy( stagingTex.data, srcImage.data, stagingTex.sizeBytes );
+diff --git a/src/betsy/EncoderEAC.cpp b/src/betsy/EncoderEAC.cpp
+index 43810c1..b040699 100644
+--- a/src/betsy/EncoderEAC.cpp
++++ b/src/betsy/EncoderEAC.cpp
+@@ -35,14 +35,14 @@ namespace betsy
+ 											  "m_eacTargetRes[1]", TextureFlags::Uav ) );
+ 		}
+ 
+-		m_eacPso = createComputePsoFromFile( "eac_r11.glsl", "../Data/" );
++		m_eacPso = createComputePsoFromFile( "eac_r11.glsl", "/usr/share/betsy/Data/" );
+ 
+ 		if( rg11 )
+ 		{
+ 			m_stitchedTarget =
+ 				createTexture( TextureParams( getBlockWidth(), getBlockHeight(), PFG_RGBA32_UINT,
+ 											  "m_stitchedTarget", TextureFlags::Uav ) );
+-			m_stitchPso = createComputePsoFromFile( "etc2_rgba_stitch.glsl", "../Data/" );
++			m_stitchPso = createComputePsoFromFile( "etc2_rgba_stitch.glsl", "/usr/share/betsy/Data/" );
+ 		}
+ 
+ 		StagingTexture stagingTex = createStagingTexture( m_width, m_height, srcImage.format, true );
+diff --git a/src/betsy/EncoderETC1.cpp b/src/betsy/EncoderETC1.cpp
+index e787834..8e84333 100644
+--- a/src/betsy/EncoderETC1.cpp
++++ b/src/betsy/EncoderETC1.cpp
+@@ -111,7 +111,7 @@ namespace betsy
+ 		{
+ 			m_ditheredTexture = createTexture( TextureParams( m_width, m_height, PFG_RGBA8_UNORM,
+ 															  "m_ditheredTexture", TextureFlags::Uav ) );
+-			m_ditherPso = createComputePsoFromFile( "dither555.glsl", "../Data/" );
++			m_ditherPso = createComputePsoFromFile( "dither555.glsl", "/usr/share/betsy/Data/" );
+ 		}
+ 		else
+ 		{
+@@ -138,7 +138,7 @@ namespace betsy
+ 		}
+ 
+ 		m_compressPso =
+-			createComputePsoFromFile( bForEtc2 ? "etc1_with_error.glsl" : "etc1.glsl", "../Data/" );
++			createComputePsoFromFile( bForEtc2 ? "etc1_with_error.glsl" : "etc1.glsl", "/usr/share/betsy/Data/" );
+ 
+ 		if( bCompressAlpha )
+ 		{
+@@ -148,11 +148,11 @@ namespace betsy
+ 			m_stitchedTarget =
+ 				createTexture( TextureParams( getBlockWidth(), getBlockHeight(), PFG_RGBA32_UINT,
+ 											  "m_stitchedTarget", TextureFlags::Uav ) );
+-			m_eacPso = createComputePsoFromFile( "eac.glsl", "../Data/" );
++			m_eacPso = createComputePsoFromFile( "eac.glsl", "/usr/share/betsy/Data/" );
+ 
+ 			// ETC2 codec does its own stitching
+ 			if( !bForEtc2 )
+-				m_stitchPso = createComputePsoFromFile( "etc2_rgba_stitch.glsl", "../Data/" );
++				m_stitchPso = createComputePsoFromFile( "etc2_rgba_stitch.glsl", "/usr/share/betsy/Data/" );
+ 		}
+ 
+ 		StagingTexture stagingTex = createStagingTexture( m_width, m_height, srcImage.format, true );
+diff --git a/src/betsy/EncoderETC2.cpp b/src/betsy/EncoderETC2.cpp
+index 810a18f..6fc4c76 100644
+--- a/src/betsy/EncoderETC2.cpp
++++ b/src/betsy/EncoderETC2.cpp
+@@ -38,15 +38,15 @@ namespace betsy
+ 		m_pModeError = createTexture( TextureParams( getBlockWidth(), getBlockHeight(), PFG_R32_FLOAT,
+ 													 "m_pModeError", TextureFlags::Uav ) );
+ 
+-		m_thModesPso = createComputePsoFromFile( "etc2_th.glsl", "../Data/" );
++		m_thModesPso = createComputePsoFromFile( "etc2_th.glsl", "/usr/share/betsy/Data/" );
+ 		m_thModesFindBestC0C1 =
+-			createComputePsoFromFile( "etc2_th_find_best_c0c1_k_means.glsl", "../Data/" );
+-		m_pModePso = createComputePsoFromFile( "etc2_p.glsl", "../Data/" );
++			createComputePsoFromFile( "etc2_th_find_best_c0c1_k_means.glsl", "/usr/share/betsy/Data/" );
++		m_pModePso = createComputePsoFromFile( "etc2_p.glsl", "/usr/share/betsy/Data/" );
+ 
+ 		if( bCompressAlpha )
+-			m_stitchPso = createComputePsoFromFile( "etc2_rgba_selector.glsl", "../Data/" );
++			m_stitchPso = createComputePsoFromFile( "etc2_rgba_selector.glsl", "/usr/share/betsy/Data/" );
+ 		else
+-			m_stitchPso = createComputePsoFromFile( "etc2_rgb_selector.glsl", "../Data/" );
++			m_stitchPso = createComputePsoFromFile( "etc2_rgb_selector.glsl", "/usr/share/betsy/Data/" );
+ 	}
+ 	//-------------------------------------------------------------------------
+ 	void EncoderETC2::deinitResources()
