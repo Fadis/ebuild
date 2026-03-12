@@ -1,0 +1,1267 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 4cb21969..bd0f6084 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,4 +1,6 @@
+ cmake_minimum_required(VERSION 3.10)
++set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
++  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
+ 
+ # Cmake build examples: for Visual Studio 2017
+ #
+@@ -173,7 +175,7 @@ cmp_option(OPTION_BUILD_BROTLIG_GUI  "Use Brotli-G Codec for GUI"    OFF    TRUE
+ # Internal testing application
+ option(OPTION_BUILD_INTERNAL_CMP_TEST "Build Internal Application: cmp_test" ON)
+ # No longer supported
+-cmp_option(OPTION_BUILD_ASTC         "Build ASTC Support"            OFF    FALSE)
++cmp_option(OPTION_BUILD_ASTC         "Build ASTC Support"            OFF    TRUE)
+ cmp_option(OPTION_BUILD_DRACO        "Build CLI Draco Support"       OFF    FALSE)
+ # this needs to be removed
+ cmp_option(NO_LEGACY_BEHAVIOR   "Disables any legacy behavior (before CMake migration)"  ON  TRUE)
+@@ -266,19 +268,8 @@ add_compile_definitions($<$<CONFIG:Debug>:_DEBUG>)
+ # -----------------------------------
+ # Set or get all package requirements
+ # -----------------------------------
+-if (COMPILER_SUPPORTS_CXX17 AND CMP_HOST_WINDOWS)
+-    set(CMAKE_CXX_STANDARD 17)
+-    add_compile_definitions(_CMP_CPP17_=1)
+-else()
+-    # Linux
+-    if (COMPILER_SUPPORTS_CXX14)
+-        set(CMAKE_CXX_STANDARD 14)
+-        add_compile_definitions(_CMP_CPP14_=1)
+-    else()
+-        # UNIX or LINUX
+-        set(CMAKE_CXX_STANDARD 11)
+-    endif()
+-endif()
++set(CMAKE_CXX_STANDARD 17)
++add_compile_definitions(_CMP_CPP17_=1)
+ 
+ # Configure Externals, they must be added via 'include' before the applications
+ include(ExternalProject)
+@@ -297,16 +288,7 @@ else()
+         add_compile_definitions(_LINUX=1)
+     endif()
+ 
+-    # filesystem support for c++14 
+-    if (COMPILER_SUPPORTS_CXX14)
+-        set(CMAKE_CXX_STANDARD 14)
+-        #add_definitions(-std=c++14)
+-        link_libraries(stdc++fs)
+-    else()
+-        if (CMP_HOST_LINUX)
+-            set(CMAKE_CXX_STANDARD 11)
+-        endif()
+-    endif()
++    set(CMAKE_CXX_STANDARD 17)
+ 
+     add_definitions(-fPIC -Wno-write-strings)
+ 
+@@ -598,4 +580,4 @@ set(CPACK_DEBIAN_PACKAGE_MAINTAINER "AMD")
+ set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://gpuopen.com/compressonator/")
+ set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
+ 
+-include(CPack)
+\ No newline at end of file
++include(CPack)
+diff --git a/applications/_plugins/canalysis/analysis/canalysis.cpp b/applications/_plugins/canalysis/analysis/canalysis.cpp
+index 557b86d1..fa73b27d 100644
+--- a/applications/_plugins/canalysis/analysis/canalysis.cpp
++++ b/applications/_plugins/canalysis/analysis/canalysis.cpp
+@@ -21,8 +21,11 @@
+ // THE SOFTWARE.
+ //
+ 
++#include <string>
++
+ // for XML file processing
+ #include <cmp_rapidxml.hpp>
++#include <rapidxml_utils.hpp>
+ 
+ // Windows Header Files:
+ #ifdef _WIN32
+@@ -64,43 +67,6 @@
+ 
+ using namespace std;
+ 
+-#ifdef _DEBUG
+-#define CMP_EXTERNAL_LibExt "d.lib"
+-#else
+-#define CMP_EXTERNAL_LibExt ".lib"
+-#endif
+-
+-#if (OPTION_CMP_OPENCV == 1)
+-#if ((CV_VERSION_EPOCH == 2) || (CV_VERSION_MAJOR < 4))
+-#if defined(_WIN32)
+-#define OpenCV_core_Lib "opencv_core" CVAUX_STR(CV_VERSION_EPOCH) CVAUX_STR(CV_VERSION_MAJOR) CVAUX_STR(CV_VERSION_MINOR) CMP_EXTERNAL_LibExt
+-#define OpenCV_highgui_Lib "opencv_highgui" CVAUX_STR(CV_VERSION_EPOCH) CVAUX_STR(CV_VERSION_MAJOR) CVAUX_STR(CV_VERSION_MINOR) CMP_EXTERNAL_LibExt
+-#define OpenCV_imgproc_Lib "opencv_imgproc" CVAUX_STR(CV_VERSION_EPOCH) CVAUX_STR(CV_VERSION_MAJOR) CVAUX_STR(CV_VERSION_MINOR) CMP_EXTERNAL_LibExt
+-#else
+-#define OpenCV_core_Lib "opencv_core" CVAUX_STR(CV_VERSION_MAJOR) CVAUX_STR(CV_VERSION_MINOR) CVAUX_STR(CV_VERSION_REVISION) CMP_EXTERNAL_LibExt
+-#define OpenCV_highgui_Lib "opencv_highgui" CVAUX_STR(CV_VERSION_MAJOR) CVAUX_STR(CV_VERSION_MINOR) CVAUX_STR(CV_VERSION_REVISION) CMP_EXTERNAL_LibExt
+-#define OpenCV_imgproc_Lib "opencv_imgproc" CVAUX_STR(CV_VERSION_MAJOR) CVAUX_STR(CV_VERSION_MINOR) CVAUX_STR(CV_VERSION_REVISION) CMP_EXTERNAL_LibExt
+-#endif
+-
+-#pragma comment(lib, OpenCV_core_Lib)
+-#pragma comment(lib, OpenCV_highgui_Lib)
+-#pragma comment(lib, OpenCV_imgproc_Lib)
+-#else
+-#define OpenCV_world_Lib "opencv_world" CVAUX_STR(CV_VERSION_MAJOR) CVAUX_STR(CV_VERSION_MINOR) CVAUX_STR(CV_VERSION_REVISION) CMP_EXTERNAL_LibExt
+-#pragma comment(lib, OpenCV_world_Lib)
+-#endif
+-#endif
+-
+-#if (OPTION_CMP_QT == 1)
+-#define Qt5_core_Lib "Qt5Core" CMP_EXTERNAL_LibExt
+-#define Qt5_gui_Lib "Qt5Gui" CMP_EXTERNAL_LibExt
+-#define Qt5_widgets_Lib "Qt5Widgets" CMP_EXTERNAL_LibExt
+-
+-#pragma comment(lib, Qt5_core_Lib)
+-#pragma comment(lib, Qt5_gui_Lib)
+-#pragma comment(lib, Qt5_widgets_Lib)
+-#endif
+-
+ #ifdef BUILD_AS_PLUGIN_DLL
+ DECLARE_PLUGIN(Plugin_Canalysis)
+ SET_PLUGIN_TYPE("IMAGE")
+@@ -305,7 +271,7 @@ void Plugin_Canalysis::write(const REPORT_DATA& data, char* resultsFile, char op
+     }
+     else
+     {  //file not exist
+-        rapidxml::xml_node<>* decl = xmlDoc.allocate_node(rapidxml::node_declaration);
++        rapidxml::xml_node<>* decl = xmlDoc.allocate_node(rapidxml::node_type::node_declaration);
+         decl->append_attribute(xmlDoc.allocate_attribute("version", "1.0"));
+         decl->append_attribute(xmlDoc.allocate_attribute("encoding", "UTF-8"));
+         xmlDoc.append_node(decl);
+diff --git a/applications/_plugins/cgpudecode/opengl/CMakeLists.txt b/applications/_plugins/cgpudecode/opengl/CMakeLists.txt
+index 8d22757c..ec9d2064 100644
+--- a/applications/_plugins/cgpudecode/opengl/CMakeLists.txt
++++ b/applications/_plugins/cgpudecode/opengl/CMakeLists.txt
+@@ -26,10 +26,7 @@ target_link_libraries(GPUDecode_OpenGL
+         CMP_GpuDecode
+ 
+         ExtOpenGL
+-        ExtGLEW
+-
+-    INTERFACE
+-        ExtGLEW
++        ${GLEW_LIBRARIES}
+ )
+ 
+ target_compile_definitions(GPUDecode_OpenGL PRIVATE BUILD_AS_PLUGIN_DLL=1)
+diff --git a/applications/_plugins/cgpudecode/opengl/gpu_opengl.cpp b/applications/_plugins/cgpudecode/opengl/gpu_opengl.cpp
+index 080825d0..4c461c0b 100644
+--- a/applications/_plugins/cgpudecode/opengl/gpu_opengl.cpp
++++ b/applications/_plugins/cgpudecode/opengl/gpu_opengl.cpp
+@@ -36,24 +36,6 @@
+ 
+ #include <assert.h>
+ 
+-#if defined(_WIN32)                   //&& !defined(NO_LEGACY_BEHAVIOR)
+-#pragma comment(lib, "opengl32.lib")  // Open GL
+-#pragma comment(lib, "Glu32.lib")     // Glu
+-#pragma comment(lib, "glew32.lib")    // glew
+-#else
+-#ifdef _WIN32
+-#pragma comment(lib, "opengl32.lib")  // Open GL
+-#pragma comment(lib, "Glu32.lib")     // Glu
+-//#ifdef _DEBUG
+-//    #pragma comment(lib, "glew32d.lib")   // glew
+-//#else
+-#pragma comment(lib, "glew32.lib")    // glew
+-//#endif
+-#else
+-#pragma comment(lib, "libglew32.lib")  // glew
+-#endif
+-#endif
+-
+ static_assert(sizeof(unsigned int) == sizeof(GLuint), "Inconsistent size for GLuint");
+ static_assert(sizeof(unsigned int) == sizeof(GLenum), "Inconsistent size for GLenum");
+ 
+diff --git a/applications/_plugins/cimage/CMakeLists.txt b/applications/_plugins/cimage/CMakeLists.txt
+index 2fbb559c..c9d7821e 100644
+--- a/applications/_plugins/cimage/CMakeLists.txt
++++ b/applications/_plugins/cimage/CMakeLists.txt
+@@ -3,7 +3,6 @@ add_library(Plugin_CImage INTERFACE)
+ 
+ add_subdirectory(dds)
+ add_subdirectory(exr)
+-add_subdirectory(tga)
+ add_subdirectory(binary)
+ 
+ set(CIMAGE_PLUGINS "")
+@@ -29,4 +28,4 @@ target_link_libraries(Plugin_CImage INTERFACE
+     ${CIMAGE_PLUGINS}
+ )
+ 
+-#set_target_properties(Plugin_CImage PROPERTIES FOLDER ${FOLDER_NAME})
+\ No newline at end of file
++#set_target_properties(Plugin_CImage PROPERTIES FOLDER ${FOLDER_NAME})
+diff --git a/applications/_plugins/cimage/ktx/ktx1.cpp b/applications/_plugins/cimage/ktx/ktx1.cpp
+index d0fa34a7..2895a5d2 100644
+--- a/applications/_plugins/cimage/ktx/ktx1.cpp
++++ b/applications/_plugins/cimage/ktx/ktx1.cpp
+@@ -36,20 +36,6 @@
+ #include <stdio.h>
+ #include <stdlib.h>
+ 
+-#if defined(_WIN32)                 //&& !defined(NO_LEGACY_BEHAVIOR)
+-#pragma comment(lib, "glew32.lib")  // glew
+-#else
+-#ifdef _WIN32
+-#ifdef _DEBUG
+-#pragma comment(lib, "libglew32d.lib")  // glew
+-#else
+-#pragma comment(lib, "libglew32.lib")  // glew
+-#endif
+-#else
+-#pragma comment(lib, "libglew32.lib")  // glew
+-#endif
+-#endif
+-
+ using namespace std;
+ 
+ using namespace std;
+diff --git a/applications/_plugins/cmp_gpu/gpuhw/CMakeLists.txt b/applications/_plugins/cmp_gpu/gpuhw/CMakeLists.txt
+index 2822afa8..fc2772af 100644
+--- a/applications/_plugins/cmp_gpu/gpuhw/CMakeLists.txt
++++ b/applications/_plugins/cmp_gpu/gpuhw/CMakeLists.txt
+@@ -21,14 +21,15 @@ target_include_directories(EncodeWith_GPU PRIVATE
+     ${PROJECT_SOURCE_DIR}/external/glad/include/
+     ${PROJECT_SOURCE_DIR}/external/glad/include/glad
+     ${PROJECT_SOURCE_DIR}/external/stb
++    ${GLFW_INCLUDE_DIR}
+ )
+ 
+ target_link_libraries(EncodeWith_GPU 
+     PRIVATE
+-    ExtGLM 
+-    ExtGLFW
+     CMP_Framework
+     CMP_Compressonator
++    ${pkgcfg_lib_GLFW_glfw}
++    ${pkgcfg_lib_GLFW_glfw3}
+ )
+ 
+ set(BUILD_PLUGIN_TARGET ${CMAKE_BINARY_DIR}/bin/debug/plugin)
+diff --git a/applications/_plugins/common/cmp_rapidxml.hpp b/applications/_plugins/common/cmp_rapidxml.hpp
+index 650bddac..766dbcdb 100644
+--- a/applications/_plugins/common/cmp_rapidxml.hpp
++++ b/applications/_plugins/common/cmp_rapidxml.hpp
+@@ -25,7 +25,6 @@
+ #define CMP_RAPIDXML_H
+ 
+ #include <rapidxml.hpp>
+-#include <rapidxml_utils.hpp>
+ 
+ /* Adding declarations to make it compatible with gcc 4.7 and greater */
+ namespace rapidxml
+diff --git a/applications/_plugins/common/vectypes.h b/applications/_plugins/common/vectypes.h
+index 6319fe87..e097d06a 100644
+--- a/applications/_plugins/common/vectypes.h
++++ b/applications/_plugins/common/vectypes.h
+@@ -16,6 +16,343 @@
+ 
+ #include <string.h>
+ 
++#undef xx
++#undef xy
++#undef xz
++#undef xw
++#undef yx
++#undef yy
++#undef yz
++#undef yw
++#undef zx
++#undef zy
++#undef zz
++#undef zw
++#undef wx
++#undef wy
++#undef wz
++#undef ww
++#undef xxx
++#undef xxy
++#undef xxz
++#undef xxw
++#undef xyx
++#undef xyy
++#undef xyz
++#undef xyw
++#undef xzx
++#undef xzy
++#undef xzz
++#undef xzw
++#undef xwx
++#undef xwy
++#undef xwz
++#undef xww
++#undef yxx
++#undef yxy
++#undef yxz
++#undef yxw
++#undef yyx
++#undef yyy
++#undef yyz
++#undef yyw
++#undef yzx
++#undef yzy
++#undef yzz
++#undef yzw
++#undef ywx
++#undef ywy
++#undef ywz
++#undef yww
++#undef zxx
++#undef zxy
++#undef zxz
++#undef zxw
++#undef zyx
++#undef zyy
++#undef zyz
++#undef zyw
++#undef zzx
++#undef zzy
++#undef zzz
++#undef zzw
++#undef zwx
++#undef zwy
++#undef zwz
++#undef zww
++#undef wxx
++#undef wxy
++#undef wxz
++#undef wxw
++#undef wyx
++#undef wyy
++#undef wyz
++#undef wyw
++#undef wzx
++#undef wzy
++#undef wzz
++#undef wzw
++#undef wwx
++#undef wwy
++#undef wwz
++#undef www
++#undef xxxx
++#undef xxxy
++#undef xxxz
++#undef xxxw
++#undef xxyx
++#undef xxyy
++#undef xxyz
++#undef xxyw
++#undef xxzx
++#undef xxzy
++#undef xxzz
++#undef xxzw
++#undef xxwx
++#undef xxwy
++#undef xxwz
++#undef xxww
++#undef xyxx
++#undef xyxy
++#undef xyxz
++#undef xyxw
++#undef xyyx
++#undef xyyy
++#undef xyyz
++#undef xyyw
++#undef xyzx
++#undef xyzy
++#undef xyzz
++#undef xyzw
++#undef xywx
++#undef xywy
++#undef xywz
++#undef xyww
++#undef xzxx
++#undef xzxy
++#undef xzxz
++#undef xzxw
++#undef xzyx
++#undef xzyy
++#undef xzyz
++#undef xzyw
++#undef xzzx
++#undef xzzy
++#undef xzzz
++#undef xzzw
++#undef xzwx
++#undef xzwy
++#undef xzwz
++#undef xzww
++#undef xwxx
++#undef xwxy
++#undef xwxz
++#undef xwxw
++#undef xwyx
++#undef xwyy
++#undef xwyz
++#undef xwyw
++#undef xwzx
++#undef xwzy
++#undef xwzz
++#undef xwzw
++#undef xwwx
++#undef xwwy
++#undef xwwz
++#undef xwww
++#undef yxxx
++#undef yxxy
++#undef yxxz
++#undef yxxw
++#undef yxyx
++#undef yxyy
++#undef yxyz
++#undef yxyw
++#undef yxzx
++#undef yxzy
++#undef yxzz
++#undef yxzw
++#undef yxwx
++#undef yxwy
++#undef yxwz
++#undef yxww
++#undef yyxx
++#undef yyxy
++#undef yyxz
++#undef yyxw
++#undef yyyx
++#undef yyyy
++#undef yyyz
++#undef yyyw
++#undef yyzx
++#undef yyzy
++#undef yyzz
++#undef yyzw
++#undef yywx
++#undef yywy
++#undef yywz
++#undef yyww
++#undef yzxx
++#undef yzxy
++#undef yzxz
++#undef yzxw
++#undef yzyx
++#undef yzyy
++#undef yzyz
++#undef yzyw
++#undef yzzx
++#undef yzzy
++#undef yzzz
++#undef yzzw
++#undef yzwx
++#undef yzwy
++#undef yzwz
++#undef yzww
++#undef ywxx
++#undef ywxy
++#undef ywxz
++#undef ywxw
++#undef ywyx
++#undef ywyy
++#undef ywyz
++#undef ywyw
++#undef ywzx
++#undef ywzy
++#undef ywzz
++#undef ywzw
++#undef ywwx
++#undef ywwy
++#undef ywwz
++#undef ywww
++#undef zxxx
++#undef zxxy
++#undef zxxz
++#undef zxxw
++#undef zxyx
++#undef zxyy
++#undef zxyz
++#undef zxyw
++#undef zxzx
++#undef zxzy
++#undef zxzz
++#undef zxzw
++#undef zxwx
++#undef zxwy
++#undef zxwz
++#undef zxww
++#undef zyxx
++#undef zyxy
++#undef zyxz
++#undef zyxw
++#undef zyyx
++#undef zyyy
++#undef zyyz
++#undef zyyw
++#undef zyzx
++#undef zyzy
++#undef zyzz
++#undef zyzw
++#undef zywx
++#undef zywy
++#undef zywz
++#undef zyww
++#undef zzxx
++#undef zzxy
++#undef zzxz
++#undef zzxw
++#undef zzyx
++#undef zzyy
++#undef zzyz
++#undef zzyw
++#undef zzzx
++#undef zzzy
++#undef zzzz
++#undef zzzw
++#undef zzwx
++#undef zzwy
++#undef zzwz
++#undef zzww
++#undef zwxx
++#undef zwxy
++#undef zwxz
++#undef zwxw
++#undef zwyx
++#undef zwyy
++#undef zwyz
++#undef zwyw
++#undef zwzx
++#undef zwzy
++#undef zwzz
++#undef zwzw
++#undef zwwx
++#undef zwwy
++#undef zwwz
++#undef zwww
++#undef wxxx
++#undef wxxy
++#undef wxxz
++#undef wxxw
++#undef wxyx
++#undef wxyy
++#undef wxyz
++#undef wxyw
++#undef wxzx
++#undef wxzy
++#undef wxzz
++#undef wxzw
++#undef wxwx
++#undef wxwy
++#undef wxwz
++#undef wxww
++#undef wyxx
++#undef wyxy
++#undef wyxz
++#undef wyxw
++#undef wyyx
++#undef wyyy
++#undef wyyz
++#undef wyyw
++#undef wyzx
++#undef wyzy
++#undef wyzz
++#undef wyzw
++#undef wywx
++#undef wywy
++#undef wywz
++#undef wyww
++#undef wzxx
++#undef wzxy
++#undef wzxz
++#undef wzxw
++#undef wzyx
++#undef wzyy
++#undef wzyz
++#undef wzyw
++#undef wzzx
++#undef wzzy
++#undef wzzz
++#undef wzzw
++#undef wzwx
++#undef wzwy
++#undef wzwz
++#undef wzww
++#undef wwxx
++#undef wwxy
++#undef wwxz
++#undef wwxw
++#undef wwyx
++#undef wwyy
++#undef wwyz
++#undef wwyw
++#undef wwzx
++#undef wwzy
++#undef wwzz
++#undef wwzw
++#undef wwwx
++#undef wwwy
++#undef wwwz
++#undef wwww
++
+ typedef unsigned int uint;
+ typedef unsigned short ushort;
+ typedef unsigned long ulong;
+diff --git a/applications/compressonatorcli/CMakeLists.txt b/applications/compressonatorcli/CMakeLists.txt
+index dc99cfb9..c68bb616 100644
+--- a/applications/compressonatorcli/CMakeLists.txt
++++ b/applications/compressonatorcli/CMakeLists.txt
+@@ -115,7 +115,7 @@ if (OPTION_BUILD_EXR)
+     if (UNIX)
+         target_include_directories(CompressonatorCLI-bin
+             PRIVATE
+-            /usr/local/include/OpenEXR/
++            ${OpenEXR_INCLUDE_DIRS}/OpenEXR/
+         )
+     endif()
+ endif()
+@@ -131,7 +131,6 @@ list(APPEND CMP_LIBS
+     CMP_Compressonator
+     CMP_Framework
+     Image_Analysis
+-    Image_TGA
+ )
+ 
+ if (OPTION_BUILD_ASTC)
+@@ -204,7 +203,6 @@ add_dependencies(CompressonatorCLI-bin
+     CMP_Compressonator
+     CMP_Framework
+     Image_Analysis
+-    Image_TGA
+ )
+ 
+ if (OPTION_BUILD_KTX2)
+@@ -261,4 +259,4 @@ endif()
+ 
+ # Installation
+ 
+-install(TARGETS CompressonatorCLI-bin DESTINATION ".")
+\ No newline at end of file
++install(TARGETS CompressonatorCLI-bin DESTINATION ".")
+diff --git a/applications/compressonatorcli/source/compressonatorcli.cpp b/applications/compressonatorcli/source/compressonatorcli.cpp
+index e7ab5fa9..c3ce0cf6 100644
+--- a/applications/compressonatorcli/source/compressonatorcli.cpp
++++ b/applications/compressonatorcli/source/compressonatorcli.cpp
+@@ -43,39 +43,11 @@
+ #include "time.h"
+ #include "version.h"
+ 
+-// Standard App Static Plugin Interfaces for minimal support
+-#if (OPTION_BUILD_ASTC == 1)
+-#pragma comment(lib, "Image_ASTC.lib")
+-#endif
+-
+-#if (OPTION_BUILD_EXR == 1)
+-#pragma comment(lib, "Image_EXR.lib")
+-#endif
+-
+-#if (OPTION_BUILD_KTX2 == 1)
+-#pragma comment(lib, "Image_KTX.lib")
+-#ifdef _WIN32
+-#pragma comment(lib, "Image_KTX2.lib")
+-#endif
+-#endif
+-
+-#pragma comment(lib, "Image_TGA.lib")
+-#pragma comment(lib, "Image_Analysis.lib")
+-
+-#ifdef USE_LOSSLESS_COMPRESSION
+-#pragma comment(lib, "Image_BRLG.lib")
+-#endif
+-
+-#ifdef USE_LOSSLESS_COMPRESSION_BINARY
+-#pragma comment(lib, "Image_BINARY.lib")
+-#endif
+-
+ #if (OPTION_BUILD_ASTC == 1)
+ extern void* make_Plugin_ASTC();
+ #endif
+ 
+ extern void* make_Plugin_EXR();
+-extern void* make_Plugin_TGA();
+ extern void* make_Plugin_KTX();
+ extern void* make_Plugin_CAnalysis();
+ 
+@@ -538,7 +510,6 @@ int main(int argc, char* argv[])
+     g_pluginManager.registerStaticPlugin("IMAGE", "EXR", (void*)make_Plugin_EXR);
+ #endif
+ 
+-    g_pluginManager.registerStaticPlugin("IMAGE", "TGA", (void*)make_Plugin_TGA);  // Use for load only, Qt will be used for Save
+     g_pluginManager.registerStaticPlugin("IMAGE", "ANALYSIS", (void*)make_Plugin_CAnalysis);
+ 
+ #if (OPTION_BUILD_KTX2 == 1)
+diff --git a/cmake/FindGLM.cmake b/cmake/FindGLM.cmake
+new file mode 100644
+index 00000000..5060642c
+--- /dev/null
++++ b/cmake/FindGLM.cmake
+@@ -0,0 +1,15 @@
++include(FindPackageHandleStandardArgs)
++
++if(NOT GLM_ROOT)
++  find_path(GLM_INCLUDE_DIRS NAMES glm/glm.hpp PATHS ${CMAKE_SYSTEM_INCLUDE_PATH})
++else()
++  find_path(GLM_INCLUDE_DIRS NAMES glm/glm.hpp NO_DEFAULT_PATH PATHS ${GLM_ROOT})
++endif()
++if(GLM_INCLUDE_DIRS)
++  set(GLM_FOUND TRUE)
++else()
++  set(GLM_FOUND FALSE)
++  set(GLM_INCLUDE_DIRS)
++endif()
++mark_as_advanced(GLM_INCLUDE_DIRS)
++
+diff --git a/cmp_compressonatorlib/astc/arm/vectypes.h b/cmp_compressonatorlib/astc/arm/vectypes.h
+index 1feffdee..ae942526 100644
+--- a/cmp_compressonatorlib/astc/arm/vectypes.h
++++ b/cmp_compressonatorlib/astc/arm/vectypes.h
+@@ -18,6 +18,344 @@
+ 
+ #include <string.h>
+ 
++#undef xx
++#undef xy
++#undef xz
++#undef xw
++#undef yx
++#undef yy
++#undef yz
++#undef yw
++#undef zx
++#undef zy
++#undef zz
++#undef zw
++#undef wx
++#undef wy
++#undef wz
++#undef ww
++#undef xxx
++#undef xxy
++#undef xxz
++#undef xxw
++#undef xyx
++#undef xyy
++#undef xyz
++#undef xyw
++#undef xzx
++#undef xzy
++#undef xzz
++#undef xzw
++#undef xwx
++#undef xwy
++#undef xwz
++#undef xww
++#undef yxx
++#undef yxy
++#undef yxz
++#undef yxw
++#undef yyx
++#undef yyy
++#undef yyz
++#undef yyw
++#undef yzx
++#undef yzy
++#undef yzz
++#undef yzw
++#undef ywx
++#undef ywy
++#undef ywz
++#undef yww
++#undef zxx
++#undef zxy
++#undef zxz
++#undef zxw
++#undef zyx
++#undef zyy
++#undef zyz
++#undef zyw
++#undef zzx
++#undef zzy
++#undef zzz
++#undef zzw
++#undef zwx
++#undef zwy
++#undef zwz
++#undef zww
++#undef wxx
++#undef wxy
++#undef wxz
++#undef wxw
++#undef wyx
++#undef wyy
++#undef wyz
++#undef wyw
++#undef wzx
++#undef wzy
++#undef wzz
++#undef wzw
++#undef wwx
++#undef wwy
++#undef wwz
++#undef www
++#undef xxxx
++#undef xxxy
++#undef xxxz
++#undef xxxw
++#undef xxyx
++#undef xxyy
++#undef xxyz
++#undef xxyw
++#undef xxzx
++#undef xxzy
++#undef xxzz
++#undef xxzw
++#undef xxwx
++#undef xxwy
++#undef xxwz
++#undef xxww
++#undef xyxx
++#undef xyxy
++#undef xyxz
++#undef xyxw
++#undef xyyx
++#undef xyyy
++#undef xyyz
++#undef xyyw
++#undef xyzx
++#undef xyzy
++#undef xyzz
++#undef xyzw
++#undef xywx
++#undef xywy
++#undef xywz
++#undef xyww
++#undef xzxx
++#undef xzxy
++#undef xzxz
++#undef xzxw
++#undef xzyx
++#undef xzyy
++#undef xzyz
++#undef xzyw
++#undef xzzx
++#undef xzzy
++#undef xzzz
++#undef xzzw
++#undef xzwx
++#undef xzwy
++#undef xzwz
++#undef xzww
++#undef xwxx
++#undef xwxy
++#undef xwxz
++#undef xwxw
++#undef xwyx
++#undef xwyy
++#undef xwyz
++#undef xwyw
++#undef xwzx
++#undef xwzy
++#undef xwzz
++#undef xwzw
++#undef xwwx
++#undef xwwy
++#undef xwwz
++#undef xwww
++#undef yxxx
++#undef yxxy
++#undef yxxz
++#undef yxxw
++#undef yxyx
++#undef yxyy
++#undef yxyz
++#undef yxyw
++#undef yxzx
++#undef yxzy
++#undef yxzz
++#undef yxzw
++#undef yxwx
++#undef yxwy
++#undef yxwz
++#undef yxww
++#undef yyxx
++#undef yyxy
++#undef yyxz
++#undef yyxw
++#undef yyyx
++#undef yyyy
++#undef yyyz
++#undef yyyw
++#undef yyzx
++#undef yyzy
++#undef yyzz
++#undef yyzw
++#undef yywx
++#undef yywy
++#undef yywz
++#undef yyww
++#undef yzxx
++#undef yzxy
++#undef yzxz
++#undef yzxw
++#undef yzyx
++#undef yzyy
++#undef yzyz
++#undef yzyw
++#undef yzzx
++#undef yzzy
++#undef yzzz
++#undef yzzw
++#undef yzwx
++#undef yzwy
++#undef yzwz
++#undef yzww
++#undef ywxx
++#undef ywxy
++#undef ywxz
++#undef ywxw
++#undef ywyx
++#undef ywyy
++#undef ywyz
++#undef ywyw
++#undef ywzx
++#undef ywzy
++#undef ywzz
++#undef ywzw
++#undef ywwx
++#undef ywwy
++#undef ywwz
++#undef ywww
++#undef zxxx
++#undef zxxy
++#undef zxxz
++#undef zxxw
++#undef zxyx
++#undef zxyy
++#undef zxyz
++#undef zxyw
++#undef zxzx
++#undef zxzy
++#undef zxzz
++#undef zxzw
++#undef zxwx
++#undef zxwy
++#undef zxwz
++#undef zxww
++#undef zyxx
++#undef zyxy
++#undef zyxz
++#undef zyxw
++#undef zyyx
++#undef zyyy
++#undef zyyz
++#undef zyyw
++#undef zyzx
++#undef zyzy
++#undef zyzz
++#undef zyzw
++#undef zywx
++#undef zywy
++#undef zywz
++#undef zyww
++#undef zzxx
++#undef zzxy
++#undef zzxz
++#undef zzxw
++#undef zzyx
++#undef zzyy
++#undef zzyz
++#undef zzyw
++#undef zzzx
++#undef zzzy
++#undef zzzz
++#undef zzzw
++#undef zzwx
++#undef zzwy
++#undef zzwz
++#undef zzww
++#undef zwxx
++#undef zwxy
++#undef zwxz
++#undef zwxw
++#undef zwyx
++#undef zwyy
++#undef zwyz
++#undef zwyw
++#undef zwzx
++#undef zwzy
++#undef zwzz
++#undef zwzw
++#undef zwwx
++#undef zwwy
++#undef zwwz
++#undef zwww
++#undef wxxx
++#undef wxxy
++#undef wxxz
++#undef wxxw
++#undef wxyx
++#undef wxyy
++#undef wxyz
++#undef wxyw
++#undef wxzx
++#undef wxzy
++#undef wxzz
++#undef wxzw
++#undef wxwx
++#undef wxwy
++#undef wxwz
++#undef wxww
++#undef wyxx
++#undef wyxy
++#undef wyxz
++#undef wyxw
++#undef wyyx
++#undef wyyy
++#undef wyyz
++#undef wyyw
++#undef wyzx
++#undef wyzy
++#undef wyzz
++#undef wyzw
++#undef wywx
++#undef wywy
++#undef wywz
++#undef wyww
++#undef wzxx
++#undef wzxy
++#undef wzxz
++#undef wzxw
++#undef wzyx
++#undef wzyy
++#undef wzyz
++#undef wzyw
++#undef wzzx
++#undef wzzy
++#undef wzzz
++#undef wzzw
++#undef wzwx
++#undef wzwy
++#undef wzwz
++#undef wzww
++#undef wwxx
++#undef wwxy
++#undef wwxz
++#undef wwxw
++#undef wwyx
++#undef wwyy
++#undef wwyz
++#undef wwyw
++#undef wwzx
++#undef wwzy
++#undef wwzz
++#undef wwzw
++#undef wwwx
++#undef wwwy
++#undef wwwz
++#undef wwww
++
++
+ typedef unsigned int uint;
+ typedef unsigned short ushort;
+ typedef unsigned long ulong;
+diff --git a/cmp_compressonatorlib/astc/astc_library.cpp b/cmp_compressonatorlib/astc/astc_library.cpp
+index 5e2be065..1455b904 100644
+--- a/cmp_compressonatorlib/astc/astc_library.cpp
++++ b/cmp_compressonatorlib/astc/astc_library.cpp
+@@ -22,10 +22,10 @@
+ // THE SOFTWARE.
+ //
+ 
++#include "compressonator.h"
+ #include "astc/astc_definitions.h"
+ #include "astc/astc_encode.h"
+ #include "astc/astc_decode.h"
+-#include "compressonator.h"
+ 
+ extern CMP_BOOL         g_LibraryInitialized;
+ static ASTCBlockDecoder g_Decoder;
+diff --git a/cmp_core/shaders/bcn_common_kernel.h b/cmp_core/shaders/bcn_common_kernel.h
+index 2b21fae1..e390e530 100644
+--- a/cmp_core/shaders/bcn_common_kernel.h
++++ b/cmp_core/shaders/bcn_common_kernel.h
+@@ -33,6 +33,8 @@
+ #ifndef _BCN_COMMON_KERNEL_H
+ #define _BCN_COMMON_KERNEL_H
+ 
++#include <stdlib.h>
++
+ #pragma warning(disable : 4505)  // disable warnings on unreferenced local function has been removed
+ 
+ #include "common_def.h"
+diff --git a/external/cmake/customtargets/customtarget_glew.cmake b/external/cmake/customtargets/customtarget_glew.cmake
+index e80eb51f..a608e5ca 100644
+--- a/external/cmake/customtargets/customtarget_glew.cmake
++++ b/external/cmake/customtargets/customtarget_glew.cmake
+@@ -9,55 +9,3 @@ get_filename_component(GLEW_DIR ${COMPRESSONATOR_PROJECT_DIR}/external/glew/glew
+ set(GLEW_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/glew-${GLEW_VERSION})
+ file(MAKE_DIRECTORY ${GLEW_BINARY_DIR})
+ 
+-file(GLOB_RECURSE GLEW_SRC
+-
+-    ${GLEW_DIR}/auto/src/*.c
+-    ${GLEW_DIR}/auto/src/*.h
+-)
+-
+-set(GLEW_INCLUDE_DIR ${DEPENDENCIES_INSTALL_DIR}/include)
+-
+-if (WIN32)
+-    set(GLEW_LIBS ${DEPENDENCIES_INSTALL_DIR}/lib/libglew32.lib)
+-else()
+-    set(GLEW_LIBS ${DEPENDENCIES_INSTALL_DIR}/lib/libGLEW.a)
+-endif()
+-
+-add_custom_command(OUTPUT ${GLEW_LIBS}
+-    PRE_BUILD
+-
+-    COMMENT "Compiling Glew"
+-
+-    DEPENDS ${GLEW_SRC}
+-
+-    WORKING_DIRECTORY ${GLEW_BINARY_DIR}
+-
+-    COMMAND ${CMAKE_COMMAND} ${GLEW_DIR}/build/cmake 
+-        -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
+-        -DCMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE}"
+-        -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
+-        -DCMAKE_INSTALL_PREFIX="${DEPENDENCIES_INSTALL_DIR}"
+-        -DCMAKE_MSVC_RUNTIME_LIBRARY="${CMAKE_MSVC_RUNTIME_LIBRARY}"
+-    COMMAND ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE} --parallel ${NUM_PARALLEL_JOBS}
+-    COMMAND ${CMAKE_COMMAND} --install . --config ${CMAKE_BUILD_TYPE}
+-)
+-
+-add_custom_target(glew
+-
+-    DEPENDS ${GLEW_LIBS}
+-)
+-
+-add_library(ExtGlew INTERFACE)
+-
+-add_dependencies(ExtGlew
+-    glew
+-)
+-
+-target_link_libraries(ExtGlew INTERFACE
+-    ${GLEW_LIBS}
+-)
+-
+-target_include_directories(ExtGlew INTERFACE
+-    ${GLEW_INCLUDE_DIR}
+-)
+-
+diff --git a/external/glew/CMakeLists.txt b/external/glew/CMakeLists.txt
+index 7801b654..19473234 100644
+--- a/external/glew/CMakeLists.txt
++++ b/external/glew/CMakeLists.txt
+@@ -2,17 +2,5 @@ cmake_minimum_required(VERSION 3.13)
+ 
+ message(STATUS "++++++++++++++++++ External-GLEW" )
+ 
+-# if(POLICY CMP0091)
+-#   cmake_policy(SET CMP0091 NEW)
+-# endif()
+-
+-add_library(ExtGLEW INTERFACE)
+-
+-
+-set(ExtGLEW_BIN_PATH ${PROJECT_SOURCE_DIR}/../common/lib/ext/glew/1.9.0/bin/x64)
+-set(GLEW_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/../common/lib/ext/glew/1.9.0/include)
+-#set_property(GLOBAL PROPERTY ExtGLEW_BIN_PATH "${ExtGLEW_BIN_PATH}")
+-#list(APPEND CMAKE_FIND_ROOT_PATH ${ExtGLEW_BIN_PATH})
+-
+-target_link_libraries(ExtGLEW INTERFACE ${CMAKE_CURRENT_LIST_DIR}/../../../common/lib/ext/glew/1.9.0/lib/x64/glew32.lib)
+-target_include_directories(ExtGLEW INTERFACE ${CMAKE_CURRENT_LIST_DIR}/../../../common/lib/ext/glew/1.9.0/include)
++include(FindPkgConfig)
++pkg_check_modules(GLEW glew)
+diff --git a/external/glfw/CMakeLists.txt b/external/glfw/CMakeLists.txt
+index d62c9f1a..a63bab12 100644
+--- a/external/glfw/CMakeLists.txt
++++ b/external/glfw/CMakeLists.txt
+@@ -2,27 +2,6 @@ cmake_minimum_required(VERSION 3.13)
+ 
+ message(STATUS "++++++++++++++++++ External GLFW" )
+ 
+-# Setting default values for GLFW variables so that we build what we need
+-SET(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries" FORCE)
+-SET(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "Build the GLFW example programs" FORCE)
+-SET(GLFW_BUILD_TESTS OFF CACHE BOOL "Build the GLFW test programs" FORCE)
+-SET(GLFW_BUILD_DOCS OFF CACHE BOOL "Build the GLFW documentation" FORCE)
+-SET(GLFW_INSTALL OFF CACHE BOOL "Generate installation target" FORCE)
++include(FindPkgConfig)
++pkg_check_modules(GLFW glfw3)
+ 
+-ExternalProject_Add(extern_glfw
+-    SOURCE_DIR ${PROJECT_SOURCE_DIR}/../common/lib/ext/glfw
+-    BINARY_DIR ${PROJECT_SOURCE_DIR}/../common/lib/ext/glfw/build
+-    INSTALL_COMMAND cmake -E echo "Skipping install step."
+-)
+-
+-set_target_properties(extern_glfw PROPERTIES FOLDER ${PROJECT_FOLDER_SDK_EXTERNAL})
+-
+-add_library(ExtGLFW INTERFACE)
+-
+-set(GLFW_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/../common/lib/ext/glfw/include)
+-
+-target_include_directories(ExtGLFW INTERFACE ${PROJECT_SOURCE_DIR}/../common/lib/ext/glfw/include)
+-
+-target_link_libraries(ExtGLFW INTERFACE
+-    ${PROJECT_SOURCE_DIR}/../common/lib/ext/glfw/build/src/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/glfw3.lib
+-)
+\ No newline at end of file
+diff --git a/external/glm/CMakeLists.txt b/external/glm/CMakeLists.txt
+index 2c3cc117..265f52d2 100644
+--- a/external/glm/CMakeLists.txt
++++ b/external/glm/CMakeLists.txt
+@@ -1,18 +1,6 @@
+ message(STATUS "++++++++++++++++++ External-GLM" )
+ 
+-# -------------------------------------------------------------------------
+-
+-add_subdirectory(${PROJECT_SOURCE_DIR}/../common/lib/ext/glm ${PROJECT_SOURCE_DIR}/../common/lib/ext/glm EXCLUDE_FROM_ALL)
+-
+-# -------------------------------------------------------------------------
+-# GLM
+-
+-add_library(ExtGLM INTERFACE)
+-
+-target_include_directories(ExtGLEW INTERFACE
+-    ${PROJECT_SOURCE_DIR}/../common/lib/ext/glm
+-)
+-
++find_package(GLM REQUIRED)
+ 
+ # Enable this for newer GLM libs (using older version 0.9.8.0 is been used)
+ # target_link_libraries(ExtGLM INTERFACE
+diff --git a/external/openexr/CMakeLists.txt b/external/openexr/CMakeLists.txt
+index 7566ce1d..ff545bbf 100644
+--- a/external/openexr/CMakeLists.txt
++++ b/external/openexr/CMakeLists.txt
+@@ -3,23 +3,6 @@ cmake_minimum_required(VERSION 3.13)
+ # CMakeLists.txt
+ message(STATUS "++++++++++++++++++External Adding OpenEXR include paths" )
+ 
+-add_library(ExtOpenEXR INTERFACE)
+-
+-if (CMP_HOST_WINDOWS)
+-    target_include_directories(ExtOpenEXR INTERFACE
+-        ${CMAKE_CURRENT_LIST_DIR}/../../../common/lib/ext/openexr/openexr-2.2.0/VS2015/x64/include/OpenEXR
+-        ${CMAKE_CURRENT_LIST_DIR}/../../../common/lib/ext/openexr/ilmbase-2.2.0/VS2015/x64/include/OpenEXR
+-    )
+-
+-    set(OpenEXR_INCLUDE_DIRS 
+-        ${CMAKE_CURRENT_LIST_DIR}/../../../common/lib/ext/openexr/openexr-2.2.0/VS2015/x64/include/OpenEXR
+-        ${CMAKE_CURRENT_LIST_DIR}/../../../common/lib/ext/openexr/ilmbase-2.2.0/VS2015/x64/include/OpenEXR
+-        )
+-else()
+-    set(OpenEXR_INCLUDE_DIRS 
+-        /usr/include/Imath
+-        /usr/include/OpenEXR
+-        )
+-    target_include_directories(ExtOpenEXR INTERFACE ${OpenEXR_INCLUDE_DIRS})
+-endif()
++include(FindPkgConfig)
++pkg_check_modules(OpenEXR OpenEXR)
+ 
