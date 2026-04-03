@@ -1,0 +1,26 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7ec939b..7fb3bdd 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -37,8 +37,10 @@ if (BUILD_LINUX)
+     set(myTargetWorkspace kramWorkspace)
+ 
+     # don't want gcc, want clang
+-    SET (CMAKE_CXX_COMPILER "/usr/bin/clang++" CACHE STRING "C++ compiler" FORCE)
+-    SET (CMAKE_C_COMPILER "/usr/bin/clang" CACHE STRING "C compiler" FORCE)
++    find_program( CLANG_PATH "clang" )
++    find_program( CLANGXX_PATH "clang++" )
++    SET (CMAKE_CXX_COMPILER ${CLANGXX_PATH} CACHE STRING "C++ compiler" FORCE)
++    SET (CMAKE_C_COMPILER ${CLANG_PATH} CACHE STRING "C compiler" FORCE)
+ 
+     project(${myTargetWorkspace} LANGUAGES C CXX)
+ 
+@@ -116,7 +118,7 @@ if (BUILD_MAC)
+     # CMAKE_OSX_DEPLOYMENT_TARGET must be set as a CACHE variable, or it will be stripped
+     set(CMAKE_OSX_DEPLOYMENT_TARGET "13.0" CACHE STRING "Minimum macOS")
+     set(CMAKE_OSX_ARCHITECTURES "arm64" CACHE STRING "Architecture macOS")
+-   
++
+     #-----------------------------------------------------
+ 
+     # the kram static library libkram which should build on iOS/Android/Mac/Win
