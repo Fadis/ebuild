@@ -5,10 +5,11 @@ EAPI=8
 DESCRIPTION="NNEF Tools"
 HOMEPAGE="https://github.com/KhronosGroup/NNEF-Tools"
 EGIT_REPO_URI="https://github.com/KhronosGroup/NNEF-Tools"
+EGIT_COMMIT="0bb9c04fcf69c19e0aefa1ba9bf65f05478c8f81"
 
 LICENSE="Apache-2.0"
 SLOT="0"
-KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~mips ~ppc ~ppc64 ~s390 ~sparc ~x86"
+KEYWORDS="~alpha amd64 arm arm64 riscv ~hppa ~ia64 ~mips ~ppc ~ppc64 ~s390 ~sparc ~x86"
 IUSE=""
 
 DEPEND=""
