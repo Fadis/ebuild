@@ -16,7 +16,7 @@ IUSE=""
 DEPEND=""
 RDEPEND=""
 RESTRICT=""
-CMAKE_USE_DIR="../${P}/nnef-pyproject/nnef/cpp"
+CMAKE_USE_DIR="nnef-pyproject/nnef/cpp"
 PATCHES=(
 	"${FILESDIR}"/${PN}-lib64.patch
 )

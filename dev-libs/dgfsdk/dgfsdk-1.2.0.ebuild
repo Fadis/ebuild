@@ -21,7 +21,7 @@ SLOT="0"
 IUSE=""
 
 PATCHES=(
-  "${FILESDIR}/disable-directx.diff"
+  "${FILESDIR}/disable-directx-1.2.0.diff"
 )
 
 src_unpack() {
