@@ -1,0 +1,27 @@
+diff '--color=auto' -ubr astc-encoder-5.4.0.orig/Source/cmake_core.cmake astc-encoder-5.4.0/Source/cmake_core.cmake
+--- astc-encoder-5.4.0.orig/Source/cmake_core.cmake	2026-05-05 20:44:51.000000000 +0900
++++ astc-encoder-5.4.0/Source/cmake_core.cmake	2026-06-04 00:29:45.577971596 +0900
+@@ -87,11 +87,13 @@
+     # Veneer is compiled without any extended ISA so we can safely do
+     # ISA compatability checks without triggering a SIGILL
+     add_library(${ASTCENC_TARGET}-veneer1
++        STATIC
+         astcenccli_entry.cpp)
+ 
+     # Veneer is compiled with extended ISA but without vector length overrides
+     # so we can safely do SVE vector length compatability checks
+     add_library(${ASTCENC_TARGET}-veneer2
++        STATIC
+         astcenccli_entry2.cpp)
+ 
+     add_executable(${ASTCENC_TARGET}
+@@ -450,8 +452,6 @@
+         else()
+             target_compile_options(${ASTCENC_TARGET_NAME}
+                 PRIVATE
+-                    $<${is_clangcl}:-mcpu=native -march=native>
+-                    $<${is_gnu_fe}:-mcpu=native -march=native>
+                     $<${is_gnu_fe}:-Wno-unused-command-line-argument>)
+         endif()
+     endif()
+astc-encoder-5.4.0/Source のみに存在: cmake_core.cmake.orig
